@@ -24,37 +24,100 @@ PRICE_SYMBOLS: dict[str, str] = {
     "US10Y": "^TNX",
 }
 
-# FRED series catalog. is_rate=True means values are already in percentage points
-# (so YoY change is shown as +/- pp); is_rate=False means levels (YoY shown as %).
+# FRED series catalog.
+# is_rate=True -> values already in percentage-point space (YoY shown as +/- pp)
+# is_rate=False -> levels (YoY shown as %)
 MACRO_SERIES: dict[str, dict] = {
-    # Leading / business cycle
-    "USSLIND":   {"category": "leading",    "title": "Leading Index (US)",       "unit": "%",     "is_rate": True},
-    "CFNAI":     {"category": "leading",    "title": "Chicago Fed Activity",     "unit": "",      "is_rate": True},
-    # Rates / policy
-    "FEDFUNDS":  {"category": "rates",      "title": "Fed Funds Rate",           "unit": "%",     "is_rate": True},
-    "DGS2":      {"category": "rates",      "title": "2Y Treasury",              "unit": "%",     "is_rate": True},
-    "DGS10":     {"category": "rates",      "title": "10Y Treasury",             "unit": "%",     "is_rate": True},
-    "T10Y2Y":    {"category": "rates",      "title": "10Y-2Y Spread",            "unit": "%",     "is_rate": True},
-    # Liquidity
-    "M2SL":      {"category": "liquidity",  "title": "M2 Money Stock",           "unit": "$B",    "is_rate": False},
-    "WALCL":     {"category": "liquidity",  "title": "Fed Balance Sheet",        "unit": "$M",    "is_rate": False},
-    "WTREGEN":   {"category": "liquidity",  "title": "Treasury General Acct",    "unit": "$M",    "is_rate": False},
-    "RRPONTSYD": {"category": "liquidity",  "title": "Overnight Reverse Repo",   "unit": "$B",    "is_rate": False},
-    # Inflation
-    "CPIAUCSL":  {"category": "inflation",  "title": "CPI All Items",            "unit": "Index", "is_rate": False},
-    "CPILFESL":  {"category": "inflation",  "title": "Core CPI",                 "unit": "Index", "is_rate": False},
-    # Employment
-    "UNRATE":    {"category": "employment", "title": "Unemployment Rate",        "unit": "%",     "is_rate": True},
-    "ICSA":      {"category": "employment", "title": "Initial Claims",           "unit": "",      "is_rate": False},
-    "PAYEMS":    {"category": "employment", "title": "Nonfarm Payrolls",         "unit": "K",     "is_rate": False},
+    # ---- Signal zone components (PMI proxy + leading indicators) ----
+    "GACDFSA066MSFRBPHI": {"title": "Philly Fed Current Activity (PMI proxy)", "unit": "", "is_rate": True},
+    "GAFDFSA066MSFRBPHI": {"title": "Philly Fed Future Activity 6m",            "unit": "", "is_rate": True},
+    "NOCDFSA066MSFRBPHI": {"title": "Philly Fed New Orders",                     "unit": "", "is_rate": True},
+    "IVCDFSA066MSFRBPHI": {"title": "Philly Fed Inventories",                    "unit": "", "is_rate": True},
+    "NFCI":               {"title": "Chicago Fed NFCI",                          "unit": "", "is_rate": True},
+    # T10Y2Y already in background, but referenced in signal zone too
+    # ---- Position zone (current cycle state) ----
+    "CFNAI":              {"title": "Chicago Fed Activity Index",                "unit": "", "is_rate": True},
+    "INDPRO":             {"title": "Industrial Production",                     "unit": "Index", "is_rate": False},
+    # ---- Background zone (rates / liquidity / inflation / employment) ----
+    "FEDFUNDS":  {"title": "Fed Funds Rate",         "unit": "%",    "is_rate": True},
+    "DGS2":      {"title": "2Y Treasury",            "unit": "%",    "is_rate": True},
+    "DGS10":     {"title": "10Y Treasury",           "unit": "%",    "is_rate": True},
+    "T10Y2Y":    {"title": "10Y-2Y Spread",          "unit": "%",    "is_rate": True},
+    "M2SL":      {"title": "M2 Money Stock",         "unit": "$B",   "is_rate": False},
+    "WALCL":     {"title": "Fed Balance Sheet",      "unit": "$M",   "is_rate": False},
+    "WTREGEN":   {"title": "Treasury General Acct",  "unit": "$M",   "is_rate": False},
+    "RRPONTSYD": {"title": "Overnight Reverse Repo", "unit": "$B",   "is_rate": False},
+    "CPIAUCSL":  {"title": "CPI All Items",          "unit": "Index", "is_rate": False},
+    "CPILFESL":  {"title": "Core CPI",               "unit": "Index", "is_rate": False},
+    "UNRATE":    {"title": "Unemployment Rate",      "unit": "%",    "is_rate": True},
+    "ICSA":      {"title": "Initial Claims",         "unit": "",     "is_rate": False},
+    "PAYEMS":    {"title": "Nonfarm Payrolls",       "unit": "K",    "is_rate": False},
 }
 
-CATEGORY_LABELS = {
-    "leading":    "商业周期 / 领先指标",
-    "rates":      "货币政策 / 利率",
-    "liquidity":  "流动性",
-    "inflation":  "通胀",
-    "employment": "就业",
+# Macro page layout: explicit zones + which series go where.
+# Driven from this single source of truth so the renderer stays declarative.
+PMI_PROXY = "GACDFSA066MSFRBPHI"
+
+MACRO_LAYOUT = {
+    "signal": {
+        "label": "周期信号",
+        "subtitle": "PMI 是同步指标; 看它的领先指标预判 2-12 月后的方向。",
+        "pmi_proxy": PMI_PROXY,
+        "charts": [
+            {
+                "anchor": "future-activity",
+                "title": "费城联储未来活动 (leads 6m)",
+                "leader_id": "GAFDFSA066MSFRBPHI",
+                "leader_name": "Future Activity",
+                "lead_months": 6,
+                "interp": "上行 → 6 月后 PMI 上行;下行 → 6 月后 PMI 下行。",
+                "invert": False,
+            },
+            {
+                "anchor": "new-orders-minus-inventories",
+                "title": "新订单 − 库存 (leads 2m)",
+                "leader_id": "_NOC_MINUS_IVC",
+                "leader_name": "New Orders − Inventories",
+                "lead_months": 2,
+                "interp": "正值且上升 → 2 月后 PMI 上行;负值且下降 → 即将走弱。",
+                "invert": False,
+                "computed": {"a": "NOCDFSA066MSFRBPHI", "b": "IVCDFSA066MSFRBPHI", "op": "sub"},
+            },
+            {
+                "anchor": "nfci",
+                "title": "NFCI 金融条件 (leads 6m, 反转视图)",
+                "leader_id": "NFCI",
+                "leader_name": "NFCI (inverted)",
+                "lead_months": 6,
+                "interp": "图上「反转 NFCI」下行(实际 NFCI 上行,金融条件收紧)→ 6 月后 PMI 走弱。",
+                "invert": True,
+            },
+            {
+                "anchor": "yield-curve",
+                "title": "10Y-2Y 收益曲线 (leads 12m+)",
+                "leader_id": "T10Y2Y",
+                "leader_name": "10Y-2Y Spread",
+                "lead_months": 12,
+                "interp": "倒挂 (<0) → 12-18 月内衰退风险显著上升;转正回升 → 周期触底。",
+                "invert": False,
+            },
+        ],
+    },
+    "position": {
+        "label": "周期定位",
+        "subtitle": "当前在周期的哪一段 — 同步指标的现值。",
+        "cards": [PMI_PROXY, "CFNAI", "INDPRO"],
+    },
+    "background": {
+        "label": "背景",
+        "subtitle": "利率 / 流动性 / 通胀 / 就业 — 解释为什么领先指标在动。",
+        "subsections": [
+            {"anchor": "rates",      "label": "利率",   "ids": ["FEDFUNDS", "DGS2", "DGS10", "T10Y2Y"]},
+            {"anchor": "liquidity",  "label": "流动性", "ids": ["M2SL", "WALCL", "WTREGEN", "RRPONTSYD"]},
+            {"anchor": "inflation",  "label": "通胀",   "ids": ["CPIAUCSL", "CPILFESL"]},
+            {"anchor": "employment", "label": "就业",   "ids": ["UNRATE", "ICSA", "PAYEMS"]},
+        ],
+    },
 }
 
 

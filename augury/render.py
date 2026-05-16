@@ -62,6 +62,47 @@ def _sparkline(s: pd.Series, color: str = "#3b82f6") -> str:
                        config={"displayModeBar": False})
 
 
+def _overlay_chart(pmi: pd.Series, leader: pd.Series, lead_months: int,
+                   leader_name: str, invert: bool = False) -> str:
+    """PMI on left axis; leader shifted forward N months on right axis.
+    Anything to the right of "today" on the leader line = the prediction."""
+    leader_s = -leader if invert else leader.copy()
+    leader_s = leader_s.copy()
+    leader_s.index = leader_s.index + pd.DateOffset(months=lead_months)
+
+    cutoff = pd.Timestamp.now() - pd.DateOffset(years=8)
+    pmi_t = pmi[pmi.index >= cutoff]
+    leader_t = leader_s[leader_s.index >= cutoff]
+    today = pd.Timestamp.now().normalize()
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=pmi_t.index, y=pmi_t.values, name="PMI proxy",
+        line=dict(color="#3b82f6", width=2), yaxis="y1",
+    ))
+    fig.add_trace(go.Scatter(
+        x=leader_t.index, y=leader_t.values,
+        name=f"{leader_name} +{lead_months}m",
+        line=dict(color="#f59e0b", width=1.5, dash="dot"),
+        yaxis="y2",
+    ))
+    fig.add_vline(x=today.isoformat(), line_dash="dash", line_color="#888")
+    fig.add_annotation(x=today, y=1, yref="paper", xref="x",
+                       text="today", showarrow=False,
+                       font=dict(color="#888", size=10),
+                       xanchor="left", yanchor="top", xshift=4)
+    fig.update_layout(
+        template="plotly_dark", height=320,
+        margin=dict(l=40, r=50, t=40, b=30),
+        paper_bgcolor="#111", plot_bgcolor="#111",
+        yaxis=dict(title="PMI", side="left"),
+        yaxis2=dict(title=leader_name, side="right", overlaying="y", showgrid=False),
+        legend=dict(orientation="h", y=1.10, x=0),
+    )
+    return fig.to_html(include_plotlyjs=False, full_html=False,
+                       config={"displayModeBar": False})
+
+
 # ---------- formatters ----------
 
 def _format_value(value: float, unit: str) -> str:
@@ -89,7 +130,6 @@ def _format_value(value: float, unit: str) -> str:
 
 
 def _yoy(s: pd.Series, is_rate: bool) -> tuple[float | None, str]:
-    """Return (signed_change, label)."""
     if len(s) < 2:
         return None, ""
     cutoff = s.index[-1] - pd.Timedelta(days=365)
@@ -105,6 +145,29 @@ def _yoy(s: pd.Series, is_rate: bool) -> tuple[float | None, str]:
         return None, ""
     pct = (current / year_ago - 1) * 100
     return pct, f"{pct:+.1f}%"
+
+
+# ---------- card builder (used by position + background zones) ----------
+
+def _build_card(series_id: str) -> dict | None:
+    meta = data.MACRO_SERIES.get(series_id)
+    if not meta:
+        return None
+    df = data.load_macro(series_id)
+    if df is None or df.empty:
+        return None
+    s = df["value"]
+    current = float(s.iloc[-1])
+    change, change_label = _yoy(s, meta["is_rate"])
+    return {
+        "series_id": series_id,
+        "title": meta["title"],
+        "current": _format_value(current, meta["unit"]),
+        "change_label": change_label,
+        "change_pos": (change or 0) >= 0,
+        "sparkline": _sparkline(s, color="#22c55e" if (change or 0) >= 0 else "#ef4444"),
+        "last_date": s.index[-1].strftime("%Y-%m-%d"),
+    }
 
 
 # ---------- page renderers ----------
@@ -140,32 +203,81 @@ def render_index(prices: dict) -> None:
     (DOCS_DIR / "index.html").write_text(html)
 
 
+def _load_leader_series(chart_cfg: dict) -> pd.Series | None:
+    """Load the leader series for an overlay chart. Supports computed series."""
+    if "computed" in chart_cfg:
+        c = chart_cfg["computed"]
+        a = data.load_macro(c["a"])
+        b = data.load_macro(c["b"])
+        if a is None or b is None:
+            return None
+        a_s, b_s = a["value"], b["value"]
+        if c["op"] == "sub":
+            # Align on common index
+            joined = pd.concat([a_s.rename("a"), b_s.rename("b")], axis=1).dropna()
+            return joined["a"] - joined["b"]
+        return None
+    df = data.load_macro(chart_cfg["leader_id"])
+    return df["value"] if df is not None else None
+
+
 def render_macro() -> None:
-    cards_by_cat: dict[str, list] = {k: [] for k in data.CATEGORY_LABELS}
-    for sid, meta in data.MACRO_SERIES.items():
-        df = data.load_macro(sid)
-        if df is None or df.empty:
+    layout = data.MACRO_LAYOUT
+
+    # Zone 1: signal — build overlay charts
+    pmi_df = data.load_macro(layout["signal"]["pmi_proxy"])
+    pmi_s = pmi_df["value"] if pmi_df is not None else pd.Series(dtype=float)
+    signal_charts = []
+    for cfg in layout["signal"]["charts"]:
+        leader_s = _load_leader_series(cfg)
+        if leader_s is None or leader_s.empty or pmi_s.empty:
             continue
-        s = df["value"]
-        current = float(s.iloc[-1])
-        change, change_label = _yoy(s, meta["is_rate"])
-        cards_by_cat[meta["category"]].append({
-            "title": meta["title"],
-            "series_id": sid,
-            "current": _format_value(current, meta["unit"]),
-            "change_label": change_label,
-            "change_pos": (change or 0) >= 0,
-            "sparkline": _sparkline(s, color="#22c55e" if (change or 0) >= 0 else "#ef4444"),
-            "last_date": s.index[-1].strftime("%Y-%m-%d"),
+        signal_charts.append({
+            "anchor": cfg["anchor"],
+            "title": cfg["title"],
+            "interp": cfg["interp"],
+            "html": _overlay_chart(
+                pmi=pmi_s,
+                leader=leader_s,
+                lead_months=cfg["lead_months"],
+                leader_name=cfg["leader_name"],
+                invert=cfg.get("invert", False),
+            ),
         })
 
-    sections = []
-    for cat_key, cat_label in data.CATEGORY_LABELS.items():
-        if cards_by_cat[cat_key]:
-            sections.append({"label": cat_label, "cards": cards_by_cat[cat_key]})
+    # Zone 2: position — cards
+    position_cards = [c for sid in layout["position"]["cards"]
+                      if (c := _build_card(sid)) is not None]
+
+    # Zone 3: background — subsection grids
+    background_subs = []
+    for sub in layout["background"]["subsections"]:
+        cards = [c for sid in sub["ids"] if (c := _build_card(sid)) is not None]
+        if cards:
+            background_subs.append({"anchor": sub["anchor"], "label": sub["label"], "cards": cards})
+
+    # Sidebar items
+    sidebar = [
+        {
+            "anchor": "signal", "label": layout["signal"]["label"],
+            "subitems": [{"anchor": c["anchor"], "label": c["title"]} for c in signal_charts],
+        },
+        {
+            "anchor": "position", "label": layout["position"]["label"],
+            "subitems": [],
+        },
+        {
+            "anchor": "background", "label": layout["background"]["label"],
+            "subitems": [{"anchor": s["anchor"], "label": s["label"]} for s in background_subs],
+        },
+    ]
 
     html = env.get_template("macro.html").render(
-        sections=sections, updated=_now(), page="macro",
+        updated=_now(), page="macro",
+        sidebar=sidebar,
+        signal_zone=layout["signal"], signal_charts=signal_charts,
+        position_zone=layout["position"], position_cards=position_cards,
+        background_zone=layout["background"], background_subs=background_subs,
     )
     (DOCS_DIR / "macro.html").write_text(html)
 

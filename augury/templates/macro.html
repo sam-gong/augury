@@ -1,11 +1,47 @@
 {% extends "base.html" %}
 {% block title %}宏观{% endblock %}
 {% block content %}
-  {% for section in sections %}
-    <section class="mb-8">
-      <h2 class="text-xs text-zinc-500 uppercase tracking-widest mb-3">{{ section.label }}</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {% for card in section.cards %}
+<div class="flex gap-8">
+  <aside class="w-48 shrink-0 sticky top-4 self-start text-sm hidden md:block">
+    <nav class="space-y-4">
+      {% for zone in sidebar %}
+        <div>
+          <a href="#{{ zone.anchor }}" class="block text-zinc-200 hover:text-white font-semibold">{{ zone.label }}</a>
+          {% if zone.subitems %}
+            <ul class="mt-1 ml-2 space-y-1 text-xs text-zinc-500">
+              {% for sub in zone.subitems %}
+                <li><a href="#{{ sub.anchor }}" class="hover:text-zinc-300 leading-snug block">· {{ sub.label }}</a></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </nav>
+  </aside>
+
+  <div class="flex-1 min-w-0 space-y-12">
+
+    <section id="signal" class="scroll-mt-4">
+      <h2 class="text-xl font-semibold">{{ signal_zone.label }}</h2>
+      <p class="text-xs text-zinc-500 mb-4">{{ signal_zone.subtitle }}</p>
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        {% for chart in signal_charts %}
+          <div id="{{ chart.anchor }}" class="card scroll-mt-4">
+            <div class="mb-2">
+              <div class="text-sm font-medium text-zinc-200">{{ chart.title }}</div>
+              <div class="text-xs text-zinc-500 mt-0.5">{{ chart.interp }}</div>
+            </div>
+            {{ chart.html|safe }}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="position" class="scroll-mt-4">
+      <h2 class="text-xl font-semibold">{{ position_zone.label }}</h2>
+      <p class="text-xs text-zinc-500 mb-4">{{ position_zone.subtitle }}</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {% for card in position_cards %}
           <div class="card">
             <div class="flex items-baseline justify-between">
               <div class="text-xs text-zinc-400">{{ card.title }}</div>
@@ -13,9 +49,7 @@
             </div>
             <div class="text-2xl font-semibold num mt-1">{{ card.current }}</div>
             {% if card.change_label %}
-              <div class="text-xs num mt-1 {% if card.change_pos %}up{% else %}down{% endif %}">
-                YoY {{ card.change_label }}
-              </div>
+              <div class="text-xs num mt-1 {% if card.change_pos %}up{% else %}down{% endif %}">YoY {{ card.change_label }}</div>
             {% endif %}
             <div class="mt-2">{{ card.sparkline|safe }}</div>
             <div class="text-[10px] text-zinc-600 mt-1 num">as of {{ card.last_date }}</div>
@@ -23,8 +57,32 @@
         {% endfor %}
       </div>
     </section>
-  {% endfor %}
-  {% if not sections %}
-    <div class="card text-zinc-500">No macro data yet. Run <code>python -m augury run</code>.</div>
-  {% endif %}
+
+    <section id="background" class="scroll-mt-4">
+      <h2 class="text-xl font-semibold">{{ background_zone.label }}</h2>
+      <p class="text-xs text-zinc-500 mb-4">{{ background_zone.subtitle }}</p>
+      {% for sub in background_subs %}
+        <div id="{{ sub.anchor }}" class="mb-6 scroll-mt-4">
+          <h3 class="text-xs text-zinc-500 uppercase tracking-widest mb-2">{{ sub.label }}</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {% for card in sub.cards %}
+              <div class="card">
+                <div class="flex items-baseline justify-between">
+                  <div class="text-xs text-zinc-400">{{ card.title }}</div>
+                  <div class="text-[10px] text-zinc-600 num">{{ card.series_id }}</div>
+                </div>
+                <div class="text-lg font-semibold num mt-1">{{ card.current }}</div>
+                {% if card.change_label %}
+                  <div class="text-xs num {% if card.change_pos %}up{% else %}down{% endif %}">YoY {{ card.change_label }}</div>
+                {% endif %}
+                <div class="mt-1">{{ card.sparkline|safe }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </section>
+
+  </div>
+</div>
 {% endblock %}
