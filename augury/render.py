@@ -60,8 +60,7 @@ def _summary(prices: dict) -> dict:
     if (vix := prices.get("VIX")) is not None and not vix.empty:
         s["VIX"] = {"last": float(vix["Close"].iloc[-1])}
     if (yld := prices.get("US10Y")) is not None and not yld.empty:
-        # ^TNX is in tenths of percent (e.g. 43.2 means 4.32%)
-        s["US10Y"] = {"last": float(yld["Close"].iloc[-1]) / 10}
+        s["US10Y"] = {"last": float(yld["Close"].iloc[-1])}
     return s
 
 
