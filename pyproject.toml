@@ -13,6 +13,11 @@ dependencies = [
     "fredapi>=0.5",
     "python-dotenv>=1.0",
     "vectorbt>=0.27",
+    # Fetcher-side parsers — locally these are usually already present in any
+    # pandas-heavy env, but CI runners start clean and need them explicit:
+    "openpyxl>=3.1",  # NAAIM exposure, Atlanta Fed wage, BLS rent, NYFed inflation expectations (.xlsx)
+    "lxml>=5.0",       # NDFI / S5FI breadth (pandas.read_html on TradingView pages)
+    "pypdf>=4.0",      # ISM new-orders / inventories / prices monthly PDF tails
 ]
 
 [build-system]
