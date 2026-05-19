@@ -1,22 +1,192 @@
 {% extends "base.html" %}
 {% block title %}大盘{% endblock %}
-{% block content %}
-  <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-    {% for sym, s in summary.items() %}
-      <div class="card">
-        <div class="text-xs text-zinc-500">{{ sym }}</div>
-        <div class="text-2xl font-semibold num">{{ "%.2f"|format(s.last) }}</div>
-        {% if 'vs_ma200' in s %}
-          <div class="text-xs num mt-1 {% if s.above %}up{% else %}down{% endif %}">
-            {% if s.above %}▲{% else %}▼{% endif %} {{ "%.1f"|format(s.vs_ma200) }}% vs MA200
-          </div>
-        {% endif %}
+
+{% macro info_dot(text) -%}
+{%- if text -%}
+<div class="group relative inline-flex items-center ml-1">
+  <span class="text-zinc-600 hover:text-zinc-300 cursor-help text-[10px] leading-none transition-colors">ⓘ</span>
+  <div class="hidden group-hover:block absolute z-30 left-0 top-full mt-2 w-64 p-3 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800 rounded shadow-xl leading-relaxed normal-case tracking-normal font-normal pointer-events-none whitespace-normal">
+    {{ text }}
+  </div>
+</div>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro sparkline_card(c) %}
+<div class="card !p-3">
+  <div class="flex items-center">
+    <div class="text-[10px] text-zinc-500 uppercase tracking-wider">{{ c.label }}</div>
+    {{ info_dot(c.description) }}
+  </div>
+  <div class="flex items-center gap-3 mt-1">
+    <div class="min-w-0 flex-1">
+      <div class="text-2xl font-semibold num text-zinc-100 leading-tight">{{ c.value }}</div>
+      <div class="text-[10px] text-zinc-600 num mt-0.5">
+        {{ c.date }}{% if c.regime %} · <span class="text-zinc-400">{{ c.regime }}</span>{% endif %}
       </div>
+    </div>
+    <div class="w-32 shrink-0">{{ c.sparkline|safe }}</div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro gauge_card(g) %}
+<div class="card !p-3">
+  <div class="flex items-baseline justify-between gap-2">
+    <div class="flex items-center">
+      <div class="text-[10px] text-zinc-500 uppercase tracking-wider">{{ g.label }}</div>
+      {{ info_dot(g.description) }}
+    </div>
+    <div class="text-[10px] text-zinc-600 num">{{ g.date }}</div>
+  </div>
+  <div class="flex items-baseline gap-2 mt-1">
+    <div class="text-2xl font-semibold num text-zinc-100 leading-tight">{{ g.value }}</div>
+    {% if g.regime %}<div class="text-xs text-zinc-400">{{ g.regime }}</div>{% endif %}
+  </div>
+  <div class="relative mt-3 h-1.5 bg-zinc-800 rounded-sm">
+    {% for t_pct, _ in g.ticks %}
+      <div class="absolute top-0 bottom-0 w-px bg-zinc-700" style="left: {{ t_pct }}%"></div>
     {% endfor %}
-  </section>
-  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    {% for sym, chart_html in charts.items() %}
-      <div class="card">{{ chart_html|safe }}</div>
-    {% endfor %}
-  </section>
+    {% if g.axis_pct is defined %}
+      <div class="absolute -top-1.5 -bottom-1.5 w-px bg-zinc-500" style="left: {{ g.axis_pct }}%"></div>
+    {% endif %}
+    <div class="absolute -top-1 -bottom-1 w-[2px] bg-zinc-100 rounded-sm" style="left: calc({{ g.pct }}% - 1px)"></div>
+  </div>
+  <div class="flex justify-between text-[9px] text-zinc-600 mt-1 num">
+    <span>{{ g.range_min }}</span>
+    <span>{{ g.range_max }}</span>
+  </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+  {% if signals %}
+    <section class="mb-6">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="text-xs text-zinc-500 uppercase tracking-wider">策略状态</h2>
+        <span class="text-xs text-zinc-600 num">{{ signals|length }} 个策略</span>
+      </div>
+      <div class="card !p-0 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="text-xs text-zinc-500">
+            <tr class="border-b border-zinc-800">
+              <th class="text-left  font-normal px-3 py-2">资产</th>
+              <th class="text-left  font-normal px-3 py-2">策略</th>
+              <th class="text-left  font-normal px-3 py-2">仓位</th>
+              <th class="text-right font-normal px-3 py-2">距今</th>
+              <th class="text-left  font-normal px-3 py-2">上次信号</th>
+              <th class="text-right font-normal px-3 py-2">PnL</th>
+              <th class="text-right font-normal px-3 py-2">MAE</th>
+              <th class="text-right font-normal px-3 py-2">参考</th>
+              <th class="text-left  font-normal px-3 py-2">下次开盘</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in signals %}
+              {% set pending = r.pending_action and r.pending_action != 'hold' %}
+              <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                         {% if pending %}bg-zinc-900/60 border-l-2 border-l-zinc-100 text-zinc-100{% else %}text-zinc-600{% endif %}">
+                <td class="px-3 py-2">
+                  <a href="{{ r.page_key }}.html" class="{% if pending %}text-white font-medium{% endif %} hover:text-white">{{ r.ticker }}</a>
+                </td>
+                <td class="px-3 py-2">{{ r.strategy_label }}</td>
+                <td class="px-3 py-2">
+                  {% if r.in_position %}
+                    <span class="inline-block w-2 h-2 rounded-full {% if pending %}bg-zinc-100{% else %}bg-zinc-600{% endif %} align-middle" title="持仓"></span>
+                  {% else %}
+                    <span class="inline-block w-2 h-2 rounded-full border {% if pending %}border-zinc-300{% else %}border-zinc-700{% endif %} align-middle" title="空仓"></span>
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2 text-right num">
+                  {% if r.days_since is not none %}{{ r.days_since }} d{% else %}—{% endif %}
+                </td>
+                <td class="px-3 py-2 num">
+                  {% if r.last_action_date %}
+                    {{ '买入' if r.last_action_kind == 'buy' else '卖出' }}
+                    {{ r.last_action_date }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2 text-right num">
+                  {% if r.current_pnl is not none %}
+                    <span class="font-medium {% if r.current_pnl >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">{{ "%+.2f"|format(r.current_pnl * 100) }}%</span>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2 text-right num">
+                  {% if r.current_mae is not none %}
+                    {{ "%+.2f"|format(r.current_mae * 100) }}%
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2 text-right num">
+                  {% if r.ref_display %}
+                    {{ r.ref_label }} <span class="font-medium">{{ r.ref_display }}</span>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="px-3 py-2">
+                  {% if pending %}
+                    <span class="inline-block px-3 py-1 rounded-full bg-white text-zinc-900 text-[11px] font-bold tracking-wider shadow-md ring-1 ring-zinc-300/60">{{ '买入' if r.pending_action == 'buy' else '卖出' }}</span>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if macro_cards %}
+    <section class="mb-4">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="text-xs text-zinc-500 uppercase tracking-wider">宏观压力</h2>
+        <span class="text-[10px] text-zinc-600">日更</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {% for c in macro_cards %}{{ sparkline_card(c) }}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if liquidity_cards %}
+    <section class="mb-4">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="text-xs text-zinc-500 uppercase tracking-wider">实体 / 流动性</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% for c in liquidity_cards %}{{ sparkline_card(c) }}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if gauge_cards %}
+    <section class="mb-4">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="text-xs text-zinc-500 uppercase tracking-wider">情绪 / 风险</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {% for g in gauge_cards %}{{ gauge_card(g) }}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if position_cards %}
+    <section class="mb-6">
+      <div class="flex items-baseline justify-between mb-2">
+        <h2 class="text-xs text-zinc-500 uppercase tracking-wider">机构仓位</h2>
+        <span class="text-[10px] text-zinc-600">周更</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {% for g in position_cards %}{{ gauge_card(g) }}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
 {% endblock %}

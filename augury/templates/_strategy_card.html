@@ -1,0 +1,204 @@
+{# A single asset card. Branches on `a.mode`:
+   - 'strategy'  : asset header + price chart + strategy section (tabs +
+                   per-strategy panels)
+   - 'learning'  : minimal — header, price + MA fan
+   - missing/no_data : placeholder
+
+   Hierarchy:
+     .asset-card
+       .asset-header        ← logo + name + price + date (never changes)
+       price chart          ← canvas; overlays come from active strategy
+       .strategy-section
+         .strategy-tabs     ← shown when there are 2+ strategies
+         .strategy-panel    ← one per strategy; only active is visible
+           .strategy-info   ← spec · state · pending · ref
+           picker + metrics + equity/dd/pnl + trades
+#}
+<div class="card asset-card" id="asset-{{ a.ticker }}"
+     {% if a.mode == 'strategy' %}data-data-start="{{ a.data_start }}" data-display-start="{{ a.display_start }}" data-window-end="{{ a.window_end }}"{% endif %}>
+
+  {# ===== ASSET HEADER ===== #}
+  <div class="flex items-start justify-between gap-4 mb-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="asset-logo">
+        {% if a.logo %}
+          <img src="{{ a.logo }}" alt="{{ a.ticker }}"
+               onerror="this.style.display='none'; this.parentNode.classList.add('asset-logo-fallback'); this.parentNode.dataset.tk='{{ a.ticker[:4] }}'">
+        {% else %}
+          <span class="text-xs text-zinc-400 font-semibold">{{ a.ticker[:4] }}</span>
+        {% endif %}
+      </div>
+      <div class="min-w-0">
+        <div class="text-sm font-medium text-zinc-200 leading-tight">
+          {{ a.name }} <span class="text-zinc-500 text-xs ml-1 num">{{ a.ticker }}</span>
+        </div>
+        {% if a.mode == 'learning' %}
+          <div class="text-xs text-zinc-600 mt-0.5">观察池</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if a.status == 'ok' %}
+      <div class="shrink-0 text-right text-[11px] num space-y-0.5">
+        <div class="text-zinc-300 text-sm font-semibold">${{ "%.2f"|format(a.last_price) }}</div>
+        <div class="text-zinc-600">{{ a.last_date }}</div>
+      </div>
+    {% elif a.status == 'no_data' %}
+      <div class="text-[10px] text-zinc-600">数据待补</div>
+    {% endif %}
+  </div>
+
+  {# ===== BODY ===== #}
+  {% if a.status == 'no_data' %}
+    <div class="ph ph-sm">数据待补 · 运行 augury run 拉取</div>
+
+  {% elif a.mode == 'learning' %}
+    {{ a.chart_html|safe }}
+
+  {% elif a.mode == 'strategy' %}
+    {{ a.price_chart_html|safe }}
+
+    <div class="strategy-section mt-4">
+
+      {# Asset-level date range picker — applies to ALL strategies in this
+         card. Each panel re-runs its backtest (simple or hybrid) when the
+         range changes. Sits above the tab strip so the picker is clearly
+         an asset-level control. #}
+      <div class="strategy-bar mb-3">
+        <div class="date-range-bar" data-card-id="asset-{{ a.ticker }}">
+          <span class="date-range-label">回测起点</span>
+          <input type="date" class="date-input" data-role="start"
+                 value="{{ a.display_start }}" min="{{ a.data_start }}" max="{{ a.window_end }}">
+          <span class="text-zinc-600">→</span>
+          <input type="date" class="date-input" data-role="end"
+                 value="{{ a.window_end }}" min="{{ a.data_start }}" max="{{ a.window_end }}">
+          <button type="button" class="date-reset" title="重置到默认显示窗口"
+                  data-default-start="{{ a.display_start }}" data-default-end="{{ a.window_end }}">重置</button>
+          <span class="strategy-bar-hint" data-role="hint">数据范围 {{ a.data_start }} → {{ a.window_end }}</span>
+        </div>
+      </div>
+
+      {# Tab strip — always shown for visual consistency, even with one
+         strategy (just one label). State dot lets users scan all strategies'
+         current direction without clicking. #}
+      <div class="strategy-tabs">
+        {% for s in a.strategies %}
+          <button type="button" class="strat-tab{% if loop.first %} active{% endif %}"
+                  data-strat-idx="{{ s.idx }}">
+            <span class="strat-dot strat-dot-{% if s.pending_action in ('buy', 'sell') %}pending{% elif s.state == 'long' %}long{% else %}flat{% endif %}"></span>
+            {{ s.label }}
+          </button>
+        {% endfor %}
+      </div>
+
+      {% for s in a.strategies %}
+        <div class="strategy-panel{% if not loop.first %} hidden{% endif %}"
+             data-strat-idx="{{ s.idx }}" data-strat-kind="{{ s.kind }}">
+
+          {% if s.payload_json %}
+            <script type="application/json" class="strategy-data">{{ s.payload_json|safe }}</script>
+          {% endif %}
+
+          {# Info bar — strategy spec on one line, state/pending/ref on the next. #}
+          <div class="strategy-info">
+            <div class="text-xs text-zinc-400">
+              <span class="text-zinc-300">{{ s.label }}</span>
+              <span class="text-zinc-600">·</span>
+              <span>{{ s.spec }}</span>
+            </div>
+            <div class="text-[11px] mt-1.5 flex items-center gap-2 flex-wrap">
+              <span data-role="state-pill">
+                {% if s.state == 'long' %}
+                  <span class="signal-tag long">做多</span>
+                {% else %}
+                  <span class="signal-tag flat">{% if s.kind == 'hybrid' %}持替补{% else %}观望{% endif %}</span>
+                {% endif %}
+                <span class="text-zinc-600 ml-1">自 {{ s.state_since }}</span>
+              </span>
+              {% if s.ref_label %}
+                <span class="text-zinc-700">·</span>
+                <span class="text-zinc-500 num">
+                  {{ s.ref_label }}
+                  <span class="{% if s.dist_pct >= 0 %}up{% else %}down{% endif %}">{{ s.dist_label }}</span>
+                </span>
+              {% endif %}
+              <span data-role="pending-pill">
+                {% if s.pending_action == 'buy' %}
+                  <span class="text-zinc-700">·</span>
+                  <span class="signal-tag pending-buy">T+1 开盘买入</span>
+                {% elif s.pending_action == 'sell' %}
+                  <span class="text-zinc-700">·</span>
+                  <span class="signal-tag pending-sell">T+1 开盘平仓</span>
+                {% endif %}
+              </span>
+              <span class="text-zinc-700">·</span>
+              <span class="backtest-params text-zinc-600">{{ s.backtest_params }}</span>
+            </div>
+          </div>
+
+          <div class="metrics-row mt-3">
+            {% for k, v in s.metrics.items() %}
+              <div class="metric" tabindex="0">
+                <div class="metric-label">
+                  {{ k }}
+                  <span class="metric-info-icon" aria-hidden="true">i</span>
+                </div>
+                <div class="metric-value num" data-metric="{{ k }}">{{ v }}</div>
+                {% if s.metric_info and s.metric_info[k] %}
+                  <div class="metric-tooltip" role="tooltip">{{ s.metric_info[k] }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-4">
+            <div class="sub-chart" data-chart="equity">{{ s.equity_chart_html|safe }}</div>
+            <div class="sub-chart" data-chart="drawdown">{{ s.drawdown_chart_html|safe }}</div>
+            <div class="sub-chart" data-chart="pnl">
+              {% if s.pnl_chart_html %}{{ s.pnl_chart_html|safe }}{% else %}<div class="ph ph-sm">无已平仓交易</div>{% endif %}
+            </div>
+          </div>
+
+          <details class="mt-4 trade-table" data-role="trades">
+            <summary class="text-xs text-zinc-400 cursor-pointer hover:text-zinc-200 select-none">
+              <span data-role="trades-summary">交易记录 · {{ s.backtest_window }}</span>
+            </summary>
+            <div class="overflow-x-auto mt-2">
+              <table class="w-full text-[11px] num">
+                <thead class="text-zinc-500 border-b border-zinc-800">
+                  <tr>
+                    <th class="text-left py-1 pr-3">#</th>
+                    <th class="text-left py-1 pr-3">Entry</th>
+                    <th class="text-right py-1 pr-3">@</th>
+                    <th class="text-left py-1 pr-3">Exit</th>
+                    <th class="text-right py-1 pr-3">@</th>
+                    <th class="text-right py-1 pr-3">Return</th>
+                    <th class="text-right py-1 pr-3">MAE</th>
+                    <th class="text-left py-1">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="text-zinc-300" data-role="trades-body">
+                  {% for t in s.trades %}
+                    <tr class="border-b border-zinc-900">
+                      <td class="py-1 pr-3 text-zinc-600">{{ s.trades|length - loop.index0 }}</td>
+                      <td class="py-1 pr-3">{{ t.entry_date }}</td>
+                      <td class="py-1 pr-3 text-right">{{ t.entry_price }}</td>
+                      <td class="py-1 pr-3">{{ t.exit_date }}</td>
+                      <td class="py-1 pr-3 text-right">{{ t.exit_price }}</td>
+                      <td class="py-1 pr-3 text-right {% if t.ret_pos %}up{% else %}down{% endif %}">{{ t.ret }}</td>
+                      <td class="py-1 pr-3 text-right text-zinc-500">{{ t.mae }}</td>
+                      <td class="py-1 text-zinc-500">{{ t.status }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        </div>
+      {% endfor %}
+
+    </div>
+  {% endif %}
+
+</div>

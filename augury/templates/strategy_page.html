@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ page_cfg.label }}{% endblock %}
+{% block content %}
+<div class="flex gap-8">
+  {% include "_sidebar.html" %}
+
+  <div class="flex-1 min-w-0 space-y-6">
+
+    <div>
+      <h2 class="text-xl font-semibold">{{ page_cfg.label }}</h2>
+      <p class="text-xs text-zinc-500 mt-1">{{ page_cfg.subtitle }}</p>
+    </div>
+
+    {% if page_cfg.layout == 'grid' %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {% for a in assets %}
+          <div id="{{ a.ticker }}" class="scroll-mt-4">
+            {% include "_strategy_card.html" %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="space-y-6">
+        {% for a in assets %}
+          <div id="{{ a.ticker }}" class="scroll-mt-4">
+            {% include "_strategy_card.html" %}
+          </div>
+        {% endfor %}
+        {% if page_cfg.extras == 'breadth' %}
+          <div id="breadth" class="space-y-4 scroll-mt-4">
+            <div>
+              <h3 class="text-base font-semibold text-zinc-200">市场宽度</h3>
+              <p class="text-xs text-zinc-500 mt-1">
+                成分股价格 &gt; 50 日均线占比 · 牛市(225DMA 上方)右侧穿越 {{ 20 }}%、熊市右侧穿越 {{ 15 }}% 视为加仓信号。
+                <span class="text-zinc-600 cursor-help ml-1"
+                      title="基于当前成分股自算(忽略已退市/调整)。近期与 TradingView NDFI/S5FI 偏差 < 0.5pp;2018–2022 历史段因幸存者偏差偏高约 3pp。趋势与阈值穿越事件与 TV 一致,可直接参考。">
+                  ⓘ 关于精度
+                </span>
+              </p>
+            </div>
+            {% if breadth_sections %}
+              {% for sec in breadth_sections %}
+                <div class="card">
+                  <div class="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
+                    <div class="text-sm font-medium text-zinc-200">
+                      {{ sec.name }}
+                      <span class="text-zinc-500 text-xs ml-1 num">{{ sec.ticker }} · {{ sec.breadth_id }}</span>
+                    </div>
+                    <div class="text-[11px] num flex items-center gap-2 flex-wrap">
+                      <span class="signal-tag {% if sec.status.regime_kind == 'bull' %}long{% else %}flat{% endif %}">
+                        {{ sec.status.regime }}
+                      </span>
+                      <span class="text-zinc-700">·</span>
+                      <span class="text-zinc-300">{{ sec.breadth_id }} {{ "%.0f"|format(sec.status.breadth_now) }}%</span>
+                      <span class="text-zinc-700">·</span>
+                      <span class="signal-tag {% if sec.status.tone == 'buy' %}pending-buy{% elif sec.status.tone == 'warn' %}pending-sell{% else %}flat{% endif %}">
+                        {{ sec.status.suggestion }}
+                      </span>
+                      <span class="text-zinc-600">{{ sec.status.last_date }}</span>
+                    </div>
+                  </div>
+                  {{ sec.chart_html|safe }}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="card"><div class="ph">数据待补 · 运行 augury run 拉取</div></div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

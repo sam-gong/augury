@@ -1,0 +1,28 @@
+<aside class="w-44 shrink-0 sticky top-20 self-start hidden md:block">
+  <nav class="space-y-5">
+    {% for key, p in pages %}
+      <div>
+        <a href="{{ key }}.html"
+           class="sidenav-parent {% if page == key %}is-current{% endif %}">{{ p.label }}</a>
+        {% if p.sections or p.extras == 'breadth' %}
+          <div class="sidenav-rail">
+            {% for sec in p.sections %}
+              <a href="{{ key }}.html#{{ sec.key }}"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="{{ key }}"
+                 data-sidenav-section="{{ sec.key }}">{{ sec.label }}</a>
+            {% endfor %}
+            {% if p.extras == 'breadth' %}
+              <a href="{{ key }}.html#breadth"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="{{ key }}"
+                 data-sidenav-section="breadth">市场宽度</a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </nav>
+</aside>

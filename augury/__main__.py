@@ -1,5 +1,5 @@
 import argparse
-from augury import data, render
+from augury import indicators, render
 
 
 def cli() -> None:
@@ -13,10 +13,10 @@ def cli() -> None:
 
 def run() -> None:
     print("[augury] refreshing data…")
-    data.refresh_all()
+    indicators.refresh_all()
     print("[augury] rendering pages…")
     render.all()
-    print("[augury] done. open docs/index.html")
+    print("[augury] done. open docs/cycle.html")
 
 
 if __name__ == "__main__":

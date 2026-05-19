@@ -24,3 +24,8 @@ Manual trigger: `gh workflow run daily.yml` or the Actions tab.
 - `data/` — parquet cache, committed to git for historical snapshots
 - `docs/` — rendered HTML output, committed, served by GitHub Pages
 - `.github/workflows/daily.yml` — scheduled refresh
+- `scripts/` — one-off maintenance scripts (e.g. ISM history backfill)
+
+## Indicators
+
+See [INDICATORS.md](INDICATORS.md) for the full inventory by page (商业周期 / 就业 / 通胀 / 背景), including data source, frequency, and status (✅ working / ❌ todo / ⚠️ paused).
