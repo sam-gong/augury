@@ -1,7 +1,7 @@
 name: daily
 on:
   schedule:
-    - cron: '10 17 * * *'  # TEST: UTC 17:10 = 北京 01:10 — revert to '0 0 * * *' (北京 08:00) after first cron fire is confirmed
+    - cron: '5 17 * * *'  # TEST: UTC 17:05 = 北京 01:05 — revert to '0 0 * * *' (北京 08:00) after first cron fire is confirmed
   workflow_dispatch:
   push:
     paths:
