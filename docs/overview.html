@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Augury · {% block title %}{% endblock %}</title>
+  <title>Augury · 总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -173,26 +173,593 @@
     .sidenav-item.is-active { color: #fafafa; border-left-color: #fafafa; }
   </style>
 </head>
-<body data-page="{{ page }}">
+<body data-page="overview">
   <header class="sticky top-0 z-40 bg-[#0a0a0a] border-b border-zinc-800 px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-6">
       <h1 class="brand text-2xl">Augury</h1>
       <nav class="nav flex gap-1 text-sm">
-        <a href="index.html" class="{% if page == 'index' %}active{% endif %}">大盘</a>
-        <a href="overview.html" class="{% if page in ['overview', 'indices', 'stocks', 'learning', 'crypto'] %}active{% endif %}">策略</a>
-        <a href="cycle.html" class="{% if page in ['cycle', 'employment', 'inflation', 'background'] %}active{% endif %}">宏观</a>
+        <a href="index.html" class="">大盘</a>
+        <a href="overview.html" class="active">策略</a>
+        <a href="cycle.html" class="">宏观</a>
       </nav>
     </div>
     <a href="health.html" class="text-xs num flex items-center gap-2 px-2 py-1 rounded transition-colors
-       {% if run and run.err and run.err > 0 %}text-amber-500 hover:bg-amber-500/10{% else %}text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300{% endif %}"
+       text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
        title="点击查看数据健康详情">
-      <span class="inline-block w-1.5 h-1.5 rounded-full {% if run and run.err and run.err > 0 %}bg-amber-500{% else %}bg-zinc-600{% endif %}"></span>
-      <span>{{ updated }}</span>
-      {% if run and run.err and run.err > 0 %}<span>· {{ run.err }} 异常</span>{% endif %}
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+      <span>2026-05-19 16:28 UTC</span>
+      
     </a>
   </header>
   <main class="p-6 max-w-[1600px] mx-auto">
-    {% block content %}{% endblock %}
+    
+<div class="flex gap-8">
+  <aside class="w-44 shrink-0 sticky top-20 self-start hidden md:block">
+  <nav class="space-y-5">
+    
+      <div>
+        <a href="overview.html"
+           class="sidenav-parent is-current">总览</a>
+        
+      </div>
+    
+      <div>
+        <a href="indices.html"
+           class="sidenav-parent ">指数</a>
+        
+          <div class="sidenav-rail">
+            
+              <a href="indices.html#QQQ"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="indices"
+                 data-sidenav-section="QQQ">Nasdaq 100 (QQQ)</a>
+            
+              <a href="indices.html#SPY"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="indices"
+                 data-sidenav-section="SPY">S&amp;P 500 (SPY)</a>
+            
+            
+              <a href="indices.html#breadth"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="indices"
+                 data-sidenav-section="breadth">市场宽度</a>
+            
+          </div>
+        
+      </div>
+    
+      <div>
+        <a href="stocks.html"
+           class="sidenav-parent ">正股</a>
+        
+          <div class="sidenav-rail">
+            
+              <a href="stocks.html#NVDA"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="stocks"
+                 data-sidenav-section="NVDA">NVIDIA</a>
+            
+              <a href="stocks.html#TSLA"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="stocks"
+                 data-sidenav-section="TSLA">Tesla</a>
+            
+            
+          </div>
+        
+      </div>
+    
+      <div>
+        <a href="learning.html"
+           class="sidenav-parent ">学习仓</a>
+        
+          <div class="sidenav-rail">
+            
+              <a href="learning.html#FICO"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="FICO">Fair Isaac</a>
+            
+              <a href="learning.html#META"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="META">Meta</a>
+            
+              <a href="learning.html#RKLB"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="RKLB">Rocket Lab</a>
+            
+              <a href="learning.html#PLTR"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="PLTR">Palantir</a>
+            
+              <a href="learning.html#LLY"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="LLY">Eli Lilly</a>
+            
+              <a href="learning.html#NFLX"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="NFLX">Netflix</a>
+            
+              <a href="learning.html#APP"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="APP">AppLovin</a>
+            
+              <a href="learning.html#AAPL"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="learning"
+                 data-sidenav-section="AAPL">Apple</a>
+            
+            
+          </div>
+        
+      </div>
+    
+      <div>
+        <a href="crypto.html"
+           class="sidenav-parent ">币</a>
+        
+          <div class="sidenav-rail">
+            
+              <a href="crypto.html#BTC"
+                 class="sidenav-item"
+                 data-sidenav-link="1"
+                 data-sidenav-page="crypto"
+                 data-sidenav-section="BTC">Bitcoin</a>
+            
+            
+          </div>
+        
+      </div>
+    
+  </nav>
+</aside>
+
+  <div class="flex-1 min-w-0 space-y-6">
+
+    <div>
+      <h2 class="text-xl font-semibold">总览</h2>
+      <p class="text-xs text-zinc-500 mt-1">全部策略当前状态 — 持仓、距上次信号、PnL/MAE、下次开盘动作</p>
+    </div>
+
+    
+      <section>
+        <div class="flex items-baseline justify-between mb-2">
+          <h3 class="text-xs text-zinc-500 uppercase tracking-wider">策略状态</h3>
+          <span class="text-xs text-zinc-600 num">9 个策略</span>
+        </div>
+        <div class="card !p-0 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="text-xs text-zinc-500">
+              <tr class="border-b border-zinc-800">
+                <th class="text-left  font-normal px-3 py-2">资产</th>
+                <th class="text-left  font-normal px-3 py-2">策略</th>
+                <th class="text-left  font-normal px-3 py-2">仓位</th>
+                <th class="text-right font-normal px-3 py-2">距今</th>
+                <th class="text-left  font-normal px-3 py-2">上次信号</th>
+                <th class="text-right font-normal px-3 py-2">PnL</th>
+                <th class="text-right font-normal px-3 py-2">MAE</th>
+                <th class="text-right font-normal px-3 py-2">参考</th>
+                <th class="text-left  font-normal px-3 py-2">下次开盘</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="indices.html" class=" hover:text-white">QQQ</a>
+                  </td>
+                  <td class="px-3 py-2">SMA(225) ±1%</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full bg-zinc-600 align-middle" title="持仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    40 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      买入
+                      2026-04-09
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      <span class="font-medium text-emerald-500">+15.32%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      +0.00%
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      vs MA225 <span class="font-medium">+15.23%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="indices.html" class=" hover:text-white">SPY</a>
+                  </td>
+                  <td class="px-3 py-2">SMA(225) ±1%</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full bg-zinc-600 align-middle" title="持仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    40 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      买入
+                      2026-04-09
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      <span class="font-medium text-emerald-500">+8.56%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      +0.00%
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      vs MA225 <span class="font-medium">+9.09%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="stocks.html" class=" hover:text-white">NVDA</a>
+                  </td>
+                  <td class="px-3 py-2">SMA(225) ±1%</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full bg-zinc-600 align-middle" title="持仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    43 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      买入
+                      2026-04-06
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      <span class="font-medium text-emerald-500">+24.51%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      +0.00%
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      vs MA225 <span class="font-medium">+19.67%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="stocks.html" class=" hover:text-white">TSLA</a>
+                  </td>
+                  <td class="px-3 py-2">SMA(5) / SMA(30)</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full bg-zinc-600 align-middle" title="持仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    29 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      买入
+                      2026-04-20
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      <span class="font-medium text-rose-500">-1.31%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      -7.40%
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      MA5 vs MA30 <span class="font-medium">+7.98%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="stocks.html" class=" hover:text-white">TSLA</a>
+                  </td>
+                  <td class="px-3 py-2">SMA(5) / SMA(30) + AZO/ORLY 替补</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full bg-zinc-600 align-middle" title="持仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    29 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      买入
+                      2026-04-20
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      <span class="font-medium text-rose-500">-1.31%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      -7.40%
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      MA5 vs MA30 <span class="font-medium">+7.98%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="stocks.html" class=" hover:text-white">TSLA</a>
+                  </td>
+                  <td class="px-3 py-2">Thermo 80|22 / 70|22|50</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full border border-zinc-700 align-middle" title="空仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    0 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      卖出
+                      2026-05-19
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      —
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      —
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      温度 <span class="font-medium">55.70</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="stocks.html" class=" hover:text-white">TSLA</a>
+                  </td>
+                  <td class="px-3 py-2">Thermo 80 / 70</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full border border-zinc-700 align-middle" title="空仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    0 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      卖出
+                      2026-05-19
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      —
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      —
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      温度 <span class="font-medium">55.70</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="crypto.html" class=" hover:text-white">BTC</a>
+                  </td>
+                  <td class="px-3 py-2">SMA(120) ±1%</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full bg-zinc-600 align-middle" title="持仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    26 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      买入
+                      2026-04-23
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      <span class="font-medium text-rose-500">-2.26%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      -3.07%
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      vs MA120 <span class="font-medium">+3.56%</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+                
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           text-zinc-600">
+                  <td class="px-3 py-2">
+                    <a href="crypto.html" class=" hover:text-white">BTC</a>
+                  </td>
+                  <td class="px-3 py-2">Thermo 50|75 / 50|70</td>
+                  <td class="px-3 py-2">
+                    
+                      <span class="inline-block w-2 h-2 rounded-full border border-zinc-700 align-middle" title="空仓"></span>
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    6 d
+                  </td>
+                  <td class="px-3 py-2 num">
+                    
+                      卖出
+                      2026-05-13
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      —
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      —
+                    
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    
+                      温度 <span class="font-medium">24.33</span>
+                    
+                  </td>
+                  <td class="px-3 py-2">
+                    
+                      —
+                    
+                  </td>
+                </tr>
+              
+            </tbody>
+          </table>
+        </div>
+      </section>
+    
+
+  </div>
+</div>
+
   </main>
   <script>
     // Auto-rescale Y axes to data visible within the current X range.

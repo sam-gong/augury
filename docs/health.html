@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Augury · {% block title %}{% endblock %}</title>
+  <title>Augury · 数据健康</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -173,26 +173,1374 @@
     .sidenav-item.is-active { color: #fafafa; border-left-color: #fafafa; }
   </style>
 </head>
-<body data-page="{{ page }}">
+<body data-page="health">
   <header class="sticky top-0 z-40 bg-[#0a0a0a] border-b border-zinc-800 px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-6">
       <h1 class="brand text-2xl">Augury</h1>
       <nav class="nav flex gap-1 text-sm">
-        <a href="index.html" class="{% if page == 'index' %}active{% endif %}">大盘</a>
-        <a href="overview.html" class="{% if page in ['overview', 'indices', 'stocks', 'learning', 'crypto'] %}active{% endif %}">策略</a>
-        <a href="cycle.html" class="{% if page in ['cycle', 'employment', 'inflation', 'background'] %}active{% endif %}">宏观</a>
+        <a href="index.html" class="">大盘</a>
+        <a href="overview.html" class="">策略</a>
+        <a href="cycle.html" class="">宏观</a>
       </nav>
     </div>
     <a href="health.html" class="text-xs num flex items-center gap-2 px-2 py-1 rounded transition-colors
-       {% if run and run.err and run.err > 0 %}text-amber-500 hover:bg-amber-500/10{% else %}text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300{% endif %}"
+       text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
        title="点击查看数据健康详情">
-      <span class="inline-block w-1.5 h-1.5 rounded-full {% if run and run.err and run.err > 0 %}bg-amber-500{% else %}bg-zinc-600{% endif %}"></span>
-      <span>{{ updated }}</span>
-      {% if run and run.err and run.err > 0 %}<span>· {{ run.err }} 异常</span>{% endif %}
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+      <span>2026-05-19 16:28 UTC</span>
+      
     </a>
   </header>
   <main class="p-6 max-w-[1600px] mx-auto">
-    {% block content %}{% endblock %}
+    
+<div class="space-y-6 max-w-5xl">
+
+  <div>
+    <h2 class="text-xl font-semibold">数据健康</h2>
+    <p class="text-xs text-zinc-500 mt-1">
+      所有指标的最后一次刷新尝试状态。<span class="text-zinc-400">last_success</span> 只在拉取成功时推进 — 若它停在某个旧时间,说明上游一直拉不动。
+    </p>
+  </div>
+
+  
+    <div class="card !p-4">
+      <div class="text-[10px] text-zinc-500 uppercase tracking-wider">上次 augury run</div>
+      <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm num">
+        <div>
+          <div class="text-[10px] text-zinc-600">完成时间</div>
+          <div class="text-zinc-200">2026-05-19 16:28 UTC</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-zinc-600">耗时</div>
+          <div class="text-zinc-200">68.9s</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-zinc-600">成功</div>
+          <div class="text-emerald-500">72</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-zinc-600">异常</div>
+          <div class="text-zinc-600">0</div>
+        </div>
+      </div>
+    </div>
+  
+
+  <div class="card !p-0 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="text-xs text-zinc-500">
+        <tr class="border-b border-zinc-800">
+          <th class="text-left  font-normal px-3 py-2">指标</th>
+          <th class="text-left  font-normal px-3 py-2">名称</th>
+          <th class="text-left  font-normal px-3 py-2">频率</th>
+          <th class="text-left  font-normal px-3 py-2 num">上次成功</th>
+          <th class="text-left  font-normal px-3 py-2 num">上次尝试</th>
+          <th class="text-left  font-normal px-3 py-2">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/AAPL" target="_blank" rel="noopener" class="hover:text-white">AAPL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Apple</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/APP" target="_blank" rel="noopener" class="hover:text-white">APP</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">AppLovin</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.atlantafed.org/research-and-data/data/wage-growth-tracker" target="_blank" rel="noopener" class="hover:text-white">ATLANTA_FED_WAGE_TRACKER</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Atlanta Fed Wage Growth Tracker (3mma Overall)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:15Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:15Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/AZO" target="_blank" rel="noopener" class="hover:text-white">AZO</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">AutoZone</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/BAMLH0A0HYM2" target="_blank" rel="noopener" class="hover:text-white">BAMLH0A0HYM2</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ICE BofA US High Yield OAS</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:06Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:06Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.bls.gov/pir/new-tenant-rent.htm" target="_blank" rel="noopener" class="hover:text-white">BLS_NEW_TENANT_RENT</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">BLS New Tenant Rent Index (YoY %)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">quarterly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:16Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:16Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.binance.com/en/trade/BTC_USDT" target="_blank" rel="noopener" class="hover:text-white">BTC</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Bitcoin / USD</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CES0500000003" target="_blank" rel="noopener" class="hover:text-white">CES0500000003</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Average Hourly Earnings (Production/Nonsupervisory)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:15Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:15Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CFNAI" target="_blank" rel="noopener" class="hover:text-white">CFNAI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Chicago Fed Activity Index</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:03Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:03Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CIVPART" target="_blank" rel="noopener" class="hover:text-white">CIVPART</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Labor Force Participation</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:15Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:15Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://edition.cnn.com/markets/fear-and-greed" target="_blank" rel="noopener" class="hover:text-white">CNN_FEAR_GREED</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">CNN Fear &amp; Greed</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/HG=F" target="_blank" rel="noopener" class="hover:text-white">COPPER_GOLD</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Copper/Gold Ratio (×100)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CPIAUCSL" target="_blank" rel="noopener" class="hover:text-white">CPIAUCSL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">CPI All Items</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:08Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:08Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CPILFESL" target="_blank" rel="noopener" class="hover:text-white">CPILFESL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Core CPI</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:09Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:09Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CPIMEDSL" target="_blank" rel="noopener" class="hover:text-white">CPIMEDSL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">CPI Medical Care</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:11Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:11Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CRDQCNAPABIS" target="_blank" rel="noopener" class="hover:text-white">CRDQCNAPABIS</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">China Total Credit to Private NFCs (BIS, proxy for Credit Impulse)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">quarterly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:05Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:05Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CSUSHPINSA" target="_blank" rel="noopener" class="hover:text-white">CSUSHPINSA</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Case-Shiller US National HPI (NSA)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:11Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:11Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/CUSR0000SAH1" target="_blank" rel="noopener" class="hover:text-white">CUSR0000SAH1</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">CPI Shelter</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:11Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:11Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/DGS10" target="_blank" rel="noopener" class="hover:text-white">DGS10</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">10Y Treasury</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:06Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:06Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/DGS2" target="_blank" rel="noopener" class="hover:text-white">DGS2</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">2Y Treasury</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:05Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:05Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.federalreserve.gov/econres/notes/feds-notes/a-new-index-to-measure-us-financial-conditions-20230630.html" target="_blank" rel="noopener" class="hover:text-white">FCI_G_1Y</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Fed FCI-G (1yr lookback)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:04Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:04Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/FEDFUNDS" target="_blank" rel="noopener" class="hover:text-white">FEDFUNDS</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Fed Funds Rate</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:05Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:05Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/FICO" target="_blank" rel="noopener" class="hover:text-white">FICO</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Fair Isaac</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/GACDFSA066MSFRBPHI" target="_blank" rel="noopener" class="hover:text-white">GACDFSA066MSFRBPHI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Philly Fed Current Activity</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:02Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:02Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/GAFDFSA066MSFRBPHI" target="_blank" rel="noopener" class="hover:text-white">GAFDFSA066MSFRBPHI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Philly Fed Future Activity 6m</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:03Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:03Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/ICSA" target="_blank" rel="noopener" class="hover:text-white">ICSA</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Initial Claims</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/INDPRO" target="_blank" rel="noopener" class="hover:text-white">INDPRO</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Industrial Production</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:04Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:04Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/IR" target="_blank" rel="noopener" class="hover:text-white">IR</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Import Price Index</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:10Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:10Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                ISM_COMPOSITE_PMI
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM Composite PMI (30% Mfg + 70% Svc)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:22Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:22Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/" target="_blank" rel="noopener" class="hover:text-white">ISM_INVENTORIES</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM Manufacturing Inventories</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:00Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:00Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/" target="_blank" rel="noopener" class="hover:text-white">ISM_MFG_PRICES</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM Manufacturing Prices</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:01Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:01Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.ismworld.org/supply-management-news-and-reports/reports/ism-pmi-reports/" target="_blank" rel="noopener" class="hover:text-white">ISM_NEW_ORDERS</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM Manufacturing New Orders</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:29Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:29Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.investing.com/economic-calendar/ism-non-manufacturing-pmi-176" target="_blank" rel="noopener" class="hover:text-white">ISM_NMI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM Services PMI (NMI)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:28Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:28Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                ISM_NOC_MINUS_IVC
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM New Orders − Inventories</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:22Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:22Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.investing.com/economic-calendar/ism-manufacturing-pmi-173" target="_blank" rel="noopener" class="hover:text-white">ISM_PMI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ISM Manufacturing PMI</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:27Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:27Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/JTSJOL" target="_blank" rel="noopener" class="hover:text-white">JTSJOL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">JOLTS Job Openings</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/JTSQUR" target="_blank" rel="noopener" class="hover:text-white">JTSQUR</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">JOLTS Quits Rate</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/LLY" target="_blank" rel="noopener" class="hover:text-white">LLY</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Eli Lilly</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/M2SL" target="_blank" rel="noopener" class="hover:text-white">M2SL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">M2 Money Stock</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:07Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:07Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/META" target="_blank" rel="noopener" class="hover:text-white">META</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Meta</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/MICH" target="_blank" rel="noopener" class="hover:text-white">MICH</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">UMich 1Y Inflation Expectation</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^MOVE" target="_blank" rel="noopener" class="hover:text-white">MOVE</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">ICE BofA MOVE</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.naaim.org/programs/naaim-exposure-index/" target="_blank" rel="noopener" class="hover:text-white">NAAIM_EXPOSURE</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">NAAIM Exposure Index</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://stockcharts.com/h-sc/ui?s=$NDFI" target="_blank" rel="noopener" class="hover:text-white">NDFI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Nasdaq 100 % above 50DMA</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^NDX" target="_blank" rel="noopener" class="hover:text-white">NDX</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Nasdaq 100</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/NFCI" target="_blank" rel="noopener" class="hover:text-white">NFCI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Chicago Fed NFCI</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:04Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:04Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/NFLX" target="_blank" rel="noopener" class="hover:text-white">NFLX</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Netflix</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/NVDA" target="_blank" rel="noopener" class="hover:text-white">NVDA</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">NVIDIA</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.newyorkfed.org/microeconomics/sce" target="_blank" rel="noopener" class="hover:text-white">NYFED_INFL_EXP_1Y</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">NY Fed SCE 1Y Inflation Expectation (Median)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:20Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:20Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://www.oecd.org/en/data/indicators/composite-leading-indicator-cli.html" target="_blank" rel="noopener" class="hover:text-white">OECD_CLI_DIFFUSION</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">OECD CLI Month-over-Month Diffusion (%)</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:22Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:22Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/ORLY" target="_blank" rel="noopener" class="hover:text-white">ORLY</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">O&#39;Reilly Auto</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/PAYEMS" target="_blank" rel="noopener" class="hover:text-white">PAYEMS</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Nonfarm Payrolls</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/PCEPILFE" target="_blank" rel="noopener" class="hover:text-white">PCEPILFE</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Core PCE</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:09Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:09Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/PLTR" target="_blank" rel="noopener" class="hover:text-white">PLTR</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Palantir</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/PPIACO" target="_blank" rel="noopener" class="hover:text-white">PPIACO</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">PPI All Commodities</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:10Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:10Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/QQQ" target="_blank" rel="noopener" class="hover:text-white">QQQ</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Nasdaq 100 ETF</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/RKLB" target="_blank" rel="noopener" class="hover:text-white">RKLB</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Rocket Lab</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:14Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/RRPONTSYD" target="_blank" rel="noopener" class="hover:text-white">RRPONTSYD</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Overnight Reverse Repo</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:08Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:08Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://stockcharts.com/h-sc/ui?s=$S5FI" target="_blank" rel="noopener" class="hover:text-white">S5FI</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">S&amp;P 500 % above 50DMA</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:17Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:17Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^SKEW" target="_blank" rel="noopener" class="hover:text-white">SKEW</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">CBOE SKEW Index</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^GSPC" target="_blank" rel="noopener" class="hover:text-white">SPX</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">S&amp;P 500</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/SPY" target="_blank" rel="noopener" class="hover:text-white">SPY</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">S&amp;P 500 ETF</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/T10Y2Y" target="_blank" rel="noopener" class="hover:text-white">T10Y2Y</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">10Y-2Y Spread</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:06Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:06Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/T10YIE" target="_blank" rel="noopener" class="hover:text-white">T10YIE</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">10Y Breakeven Inflation</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:12Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:12Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/T5YIE" target="_blank" rel="noopener" class="hover:text-white">T5YIE</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">5Y Breakeven Inflation</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:12Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:12Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/TSLA" target="_blank" rel="noopener" class="hover:text-white">TSLA</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Tesla</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/UNRATE" target="_blank" rel="noopener" class="hover:text-white">UNRATE</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Unemployment Rate</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^TNX" target="_blank" rel="noopener" class="hover:text-white">US10Y</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">US 10Y Yield</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^VIX" target="_blank" rel="noopener" class="hover:text-white">VIX</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">VIX</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://finance.yahoo.com/quote/^VIX3M" target="_blank" rel="noopener" class="hover:text-white">VIX3M</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">VIX 3-Month</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:27:13Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/WALCL" target="_blank" rel="noopener" class="hover:text-white">WALCL</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Fed Balance Sheet</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:07Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:07Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     text-zinc-400">
+            <td class="px-3 py-2 num">
+              
+                <a href="https://fred.stlouisfed.org/series/WTREGEN" target="_blank" rel="noopener" class="hover:text-white">WTREGEN</a>
+              
+            </td>
+            <td class="px-3 py-2 text-zinc-500">Treasury General Acct</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:07Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-19T16:28:07Z</td>
+            <td class="px-3 py-2 text-xs">
+              
+                <span class="text-emerald-600">✓</span>
+              
+            </td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</div>
+
   </main>
   <script>
     // Auto-rescale Y axes to data visible within the current X range.

@@ -327,8 +327,11 @@ PAGES = {
                 "label": "预期",
                 "subtitle": "市场和消费者对未来通胀的看法,直接影响 Fed 决策。",
                 "cards": [
-                    {"id": "TRUEFLATION",      "priority": 1, "desc": "Trueflation 每日高频通胀替代指标,用电商/能源/房租等实时数据合成。课程作为「大账方向」的快速读数提及,反应比官方 CPI 早 1-2 月。",
-                     "spec": "(待接入) Trueflation API — truflation.com,非政府数据,日频"},
+                    {"id": "TRUEFLATION", "priority": 1,
+                     "title": "Trueflation US CPI Daily",
+                     "desc": "Trueflation 每日高频通胀替代指标,用电商/能源/房租等实时数据合成。课程作为「大账方向」的快速读数提及,反应比官方 CPI 早 1-2 月。",
+                     "spec": "Trueflation API 付费,本仪表盘不内嵌;点链接到官网看实时数据。",
+                     "link": "https://truflation.com/dashboard"},
                     {"id": "T5YIE",            "priority": 2, "desc": "TIPS 5 年隐含通胀预期(日,FRED 自计算),市场化定价。",
                      "spec": "FRED:T5YIE (5-Year Breakeven Inflation Rate)"},
                     {"id": "T10YIE",           "priority": 2, "desc": "TIPS 10 年隐含通胀预期(日)。",
@@ -437,6 +440,12 @@ def _asset(ticker, name, logo_symbol, strategy=None, strategies=None,
 
 
 STRATEGY_PAGES = {
+    "overview": {
+        "label": "总览",
+        "subtitle": "全部策略当前状态 — 持仓、距上次信号、PnL/MAE、下次开盘动作",
+        "layout": "overview",  # renderer special-cases this: status table only
+        "sections": [],         # no per-asset anchors; sidebar shows label only
+    },
     "indices": {
         "label": "指数",
         "subtitle": "225 日均线策略 + 市场宽度",

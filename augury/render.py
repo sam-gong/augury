@@ -30,6 +30,21 @@ def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 
+def _refresh_ctx() -> tuple[str, dict]:
+    """`updated` displayed in the header reflects the last *successful refresh
+    run*, not render time. When no refresh has happened yet (fresh checkout),
+    fall back to render time so the page still has a timestamp."""
+    run = indicators.run_meta()
+    completed = run.get("completed_at")
+    if completed:
+        try:
+            dt = datetime.strptime(completed, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            return dt.strftime("%Y-%m-%d %H:%M UTC"), run
+        except Exception:
+            pass
+    return _now(), run
+
+
 # ---------- chart helpers ----------
 
 def _range_selector() -> dict:
@@ -350,17 +365,24 @@ def _load_series(id: str) -> pd.Series | None:
 
 def _build_card(card_def: dict) -> dict:
     """Always returns a dict — uses status='placeholder' when data is missing,
-    so the skeleton stays complete."""
+    so the skeleton stays complete. `link` (optional) turns the placeholder
+    into a click-through to an external dashboard when the data isn't fetched
+    in-repo (e.g. Trueflation: paid API, we just point users to the site)."""
     id = card_def["id"]
     ind = indicators.REGISTRY.get(id)
     base = {
         "series_id": id,
-        "title": ind.title if ind else id,
+        "title": card_def.get("title") or (ind.title if ind else id),
         "priority": card_def.get("priority", 2),
         "desc": card_def.get("desc", ""),
         "spec": card_def.get("spec", ""),
+        "link": card_def.get("link"),
         "status": "placeholder",
     }
+    # Only registered indicators can be unhealthy — link-only cards aren't
+    # fetched, so they're always "healthy" in a refresh sense.
+    base["unhealthy"] = indicators.is_unhealthy(id) if ind else False
+    base["error"] = (indicators.meta(id) or {}).get("last_error") if ind else None
     if ind is None:
         return base
     df = indicators.load(id)
@@ -596,14 +618,11 @@ def _signals_status(prices: dict) -> list[dict]:
                     "ref_display": ref_display,
                     "page_key": page_key,
                 })
-    # Sort: rows with a pending next-open action pin to the top (those are the
-    # actionable ones). Within each group, freshly-fired signals bubble up by
-    # days_since; trade-less rows sink to the bottom.
-    def _key(r):
-        has_pending = bool(r["pending_action"] and r["pending_action"] != "hold")
-        d = r["days_since"] if r["days_since"] is not None else 10**9
-        return (0 if has_pending else 1, d)
-    rows.sort(key=_key)
+    # Sort: category (指数 → 个股 → 币 → 学习仓), then ticker alphabetical.
+    # Pending-action rows still stand out via the row's pill/highlight styling,
+    # so they don't need to be pinned to the top.
+    _PAGE_ORDER = {"indices": 0, "stocks": 1, "crypto": 2, "learning": 3}
+    rows.sort(key=lambda r: (_PAGE_ORDER.get(r["page_key"], 9), r["ticker"]))
     return rows
 
 
@@ -656,6 +675,8 @@ def _macro_card(series_id: str, label: str, fmt: str,
         "regime": regime(last_v) if regime else "",
         "description": description,
         "sparkline": _macro_sparkline(s, rangemode_tozero=rangemode_tozero),
+        "unhealthy": indicators.is_unhealthy(series_id),
+        "error": (indicators.meta(series_id) or {}).get("last_error"),
     }
 
 
@@ -687,6 +708,8 @@ def _gauge_card(series_id: str, label: str, value_min: float, value_max: float,
         "range_min": range_labels[0] if range_labels else f"{value_min:g}",
         "range_max": range_labels[1] if range_labels else f"{value_max:g}",
         "description": description,
+        "unhealthy": indicators.is_unhealthy(series_id),
+        "error": (indicators.meta(series_id) or {}).get("last_error"),
     }
     if axis_value is not None and span > 0:
         out["axis_pct"] = round((axis_value - value_min) / span * 100, 2)
@@ -836,16 +859,30 @@ def _real_liquidity_cards() -> list[dict]:
 
 
 def render_index(prices: dict) -> None:
+    updated, run = _refresh_ctx()
     html = env.get_template("index.html").render(
         macro_cards=_macro_stress_cards(),
         liquidity_cards=_real_liquidity_cards(),
         gauge_cards=_sentiment_gauges(),
         position_cards=_position_gauges(),
-        signals=_signals_status(prices),
-        updated=_now(), page="index",
+        updated=updated, run=run, page="index",
         pages=layout.sidebar_pages(),
     )
     (DOCS_DIR / "index.html").write_text(html)
+
+
+def render_strategy_overview(prices: dict) -> None:
+    """Strategy section's landing page — the cross-asset status board.
+    Lives under the 策略 nav (sibling of indices/stocks/learning/crypto)
+    so signals are co-located with the strategy detail pages."""
+    cfg = layout.strategy_page("overview")
+    updated, run = _refresh_ctx()
+    html = env.get_template("strategy_overview.html").render(
+        updated=updated, run=run, page="overview",
+        page_cfg=cfg, signals=_signals_status(prices),
+        pages=layout.sidebar_strategy_pages(),
+    )
+    (DOCS_DIR / "overview.html").write_text(html)
 
 
 def _by_priority(items: list[dict]) -> list[dict]:
@@ -867,8 +904,9 @@ def render_macro_page(page_key: str, prices: dict) -> None:
             "cards": _by_priority(cards),
         })
 
+    updated, run = _refresh_ctx()
     html = env.get_template("macro.html").render(
-        updated=_now(), page=page_key,
+        updated=updated, run=run, page=page_key,
         page_cfg=cfg, sections=sections,
         pages=layout.sidebar_pages(),
     )
@@ -1708,8 +1746,9 @@ def render_strategy_page(page_key: str, prices: dict) -> None:
                 breadth_id=bid, close=close,
                 breadth=breadth_df["value"], default_start=default_start,
             ))
+    updated, run = _refresh_ctx()
     html = env.get_template("strategy_page.html").render(
-        updated=_now(), page=page_key,
+        updated=updated, run=run, page=page_key,
         page_cfg=cfg, assets=assets,
         breadth_sections=breadth_sections,
         pages=layout.sidebar_strategy_pages(),
@@ -1720,14 +1759,47 @@ def render_strategy_page(page_key: str, prices: dict) -> None:
 STRATEGY_PAGE_KEYS = ("indices", "stocks", "learning", "crypto")
 
 
+def render_health_page() -> None:
+    """Lists every registered indicator's refresh state. Unhealthy sources
+    (most-recent attempt failed) sort to the top. Reached via the clickable
+    timestamp+status pill in the global header on every page."""
+    all_m = indicators.all_meta()
+    rows = []
+    for ind_id, ind in indicators.REGISTRY.items():
+        m = all_m.get(ind_id) or {}
+        last_a = m.get("last_attempt")
+        last_s = m.get("last_success")
+        unhealthy = bool(last_a) and last_s != last_a
+        rows.append({
+            "id": ind_id,
+            "title": ind.title,
+            "source_url": ind.source_url,
+            "frequency": ind.frequency,
+            "last_success": last_s,
+            "last_attempt": last_a,
+            "error": m.get("last_error"),
+            "unhealthy": unhealthy,
+        })
+    rows.sort(key=lambda r: (0 if r["unhealthy"] else 1, r["id"]))
+
+    updated, run = _refresh_ctx()
+    html = env.get_template("health.html").render(
+        updated=updated, run=run, page="health",
+        rows=rows,
+    )
+    (DOCS_DIR / "health.html").write_text(html)
+
+
 def all() -> None:
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     prices = {pid: indicators.load(pid) for pid in layout.PRICE_IDS}
     render_index(prices)
     for key in layout.PAGES:
         render_macro_page(key, prices)
+    render_strategy_overview(prices)
     for key in STRATEGY_PAGE_KEYS:
         render_strategy_page(key, prices)
+    render_health_page()
     # Old single-page artifact, no longer rendered. Delete if present so the
     # docs/ tree doesn't carry stale routes.
     stale = DOCS_DIR / "strategies.html"

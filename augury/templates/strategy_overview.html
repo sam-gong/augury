@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ page_cfg.label }}{% endblock %}
+{% block content %}
+<div class="flex gap-8">
+  {% include "_sidebar.html" %}
+
+  <div class="flex-1 min-w-0 space-y-6">
+
+    <div>
+      <h2 class="text-xl font-semibold">{{ page_cfg.label }}</h2>
+      <p class="text-xs text-zinc-500 mt-1">{{ page_cfg.subtitle }}</p>
+    </div>
+
+    {% if signals %}
+      <section>
+        <div class="flex items-baseline justify-between mb-2">
+          <h3 class="text-xs text-zinc-500 uppercase tracking-wider">策略状态</h3>
+          <span class="text-xs text-zinc-600 num">{{ signals|length }} 个策略</span>
+        </div>
+        <div class="card !p-0 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="text-xs text-zinc-500">
+              <tr class="border-b border-zinc-800">
+                <th class="text-left  font-normal px-3 py-2">资产</th>
+                <th class="text-left  font-normal px-3 py-2">策略</th>
+                <th class="text-left  font-normal px-3 py-2">仓位</th>
+                <th class="text-right font-normal px-3 py-2">距今</th>
+                <th class="text-left  font-normal px-3 py-2">上次信号</th>
+                <th class="text-right font-normal px-3 py-2">PnL</th>
+                <th class="text-right font-normal px-3 py-2">MAE</th>
+                <th class="text-right font-normal px-3 py-2">参考</th>
+                <th class="text-left  font-normal px-3 py-2">下次开盘</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in signals %}
+                {% set pending = r.pending_action and r.pending_action != 'hold' %}
+                <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                           {% if pending %}bg-zinc-900/60 border-l-2 border-l-zinc-100 text-zinc-100{% else %}text-zinc-600{% endif %}">
+                  <td class="px-3 py-2">
+                    <a href="{{ r.page_key }}.html" class="{% if pending %}text-white font-medium{% endif %} hover:text-white">{{ r.ticker }}</a>
+                  </td>
+                  <td class="px-3 py-2">{{ r.strategy_label }}</td>
+                  <td class="px-3 py-2">
+                    {% if r.in_position %}
+                      <span class="inline-block w-2 h-2 rounded-full {% if pending %}bg-zinc-100{% else %}bg-zinc-600{% endif %} align-middle" title="持仓"></span>
+                    {% else %}
+                      <span class="inline-block w-2 h-2 rounded-full border {% if pending %}border-zinc-300{% else %}border-zinc-700{% endif %} align-middle" title="空仓"></span>
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    {% if r.days_since is not none %}{{ r.days_since }} d{% else %}—{% endif %}
+                  </td>
+                  <td class="px-3 py-2 num">
+                    {% if r.last_action_date %}
+                      {{ '买入' if r.last_action_kind == 'buy' else '卖出' }}
+                      {{ r.last_action_date }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    {% if r.current_pnl is not none %}
+                      <span class="font-medium {% if r.current_pnl >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %}">{{ "%+.2f"|format(r.current_pnl * 100) }}%</span>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    {% if r.current_mae is not none %}
+                      {{ "%+.2f"|format(r.current_mae * 100) }}%
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-2 text-right num">
+                    {% if r.ref_display %}
+                      {{ r.ref_label }} <span class="font-medium">{{ r.ref_display }}</span>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td class="px-3 py-2">
+                    {% if pending %}
+                      <span class="inline-block px-3 py-1 rounded-full bg-white text-zinc-900 text-[11px] font-bold tracking-wider shadow-md ring-1 ring-zinc-300/60">{{ '买入' if r.pending_action == 'buy' else '卖出' }}</span>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% else %}
+      <div class="card"><div class="ph">暂无策略数据</div></div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

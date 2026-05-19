@@ -59,8 +59,16 @@
         {% if sec.cards %}
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {% for card in sec.cards %}
-              <div class="card feat p{{ card.priority }} pl-5">
-                <div class="flex items-start justify-between gap-2">
+              <div class="card feat p{{ card.priority }} pl-5 relative">
+                {% if card.unhealthy %}
+                  <span class="group absolute top-2 right-2 cursor-help">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span class="hidden group-hover:block absolute z-30 right-0 top-full mt-1 w-64 p-2 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800 rounded shadow-xl whitespace-pre-wrap normal-case tracking-normal font-normal">
+                      最近一次更新失败:{{ card.error or '未知错误' }}
+                    </span>
+                  </span>
+                {% endif %}
+                <div class="flex items-start justify-between gap-2 {% if card.unhealthy %}pr-4{% endif %}">
                   <div class="text-xs text-zinc-400 leading-tight">{{ card.title }}</div>
                   <span class="tier p{{ card.priority }} mt-0.5" title="优先级 P{{ card.priority }}"><i></i><i></i><i></i></span>
                 </div>
@@ -72,6 +80,11 @@
                   {% endif %}
                   <div class="mt-1">{{ card.sparkline|safe }}</div>
                   <div class="text-[10px] text-zinc-600 mt-1 num">as of {{ card.last_date }}</div>
+                {% elif card.link %}
+                  <a href="{{ card.link }}" target="_blank" rel="noopener"
+                     class="inline-flex items-center gap-1 mt-3 px-2.5 py-1 rounded text-[11px] text-zinc-300 border border-zinc-700 hover:bg-zinc-800 hover:text-white hover:border-zinc-600 transition-colors">
+                    查看官网 <span class="text-zinc-500">↗</span>
+                  </a>
                 {% else %}
                   <div class="ph ph-sm mt-2">数据待补</div>
                 {% endif %}

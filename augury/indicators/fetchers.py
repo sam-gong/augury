@@ -541,24 +541,6 @@ def bis_cb_cut_ratio(indicator, existing):
     return out
 
 
-# ---------- Trueflation (requires API key in env: TRUFLATION_API_KEY) ----------
-
-def trueflation(indicator, existing):
-    """Trueflation daily inflation index. Requires API key.
-    Set TRUFLATION_API_KEY in env; otherwise raises and renders as placeholder."""
-    key = os.environ.get("TRUFLATION_API_KEY")
-    if not key:
-        raise RuntimeError(
-            "TRUFLATION_API_KEY not set — Trueflation requires a paid key. "
-            "Get one at https://truflation.com/truflation-api/management, "
-            "then add to .env. Card renders as placeholder until then.")
-    # Endpoint shape per https://api.truflation.com/ — exact path varies by
-    # marketplace product. The free dashboard at truflation.com/dashboard
-    # is JS-rendered and doesn't expose a JSON endpoint without auth.
-    raise NotImplementedError(
-        "Trueflation paid endpoint integration — fill in after subscribing.")
-
-
 # ---------- Binance BTCUSDT (spot, daily klines) ----------
 
 def binance_btcusdt(indicator, existing):

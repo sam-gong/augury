@@ -236,14 +236,8 @@ register(Indicator(
     params={"column": "Median one-year ahead expected inflation rate"},
 ))
 
-# Trueflation — requires API key, currently raises (renders as placeholder).
-register(Indicator(
-    id="TRUEFLATION",
-    title="Trueflation US CPI Daily",
-    source_url="https://truflation.com/marketplace/us-inflation-rate",
-    frequency="daily", unit="%", is_rate=True, fetcher=f.trueflation,
-))
-
+# Trueflation: 非政府数据,API 付费且占用心智不大。我们在 inflation 页保留一张
+# 链接卡引导到官网,不进 REGISTRY、不参与刷新。
 
 # ---------- OECD CLI diffusion (computed across member countries) ----------
 register(Indicator(

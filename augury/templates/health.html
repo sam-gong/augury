@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}数据健康{% endblock %}
+{% block content %}
+<div class="space-y-6 max-w-5xl">
+
+  <div>
+    <h2 class="text-xl font-semibold">数据健康</h2>
+    <p class="text-xs text-zinc-500 mt-1">
+      所有指标的最后一次刷新尝试状态。<span class="text-zinc-400">last_success</span> 只在拉取成功时推进 — 若它停在某个旧时间,说明上游一直拉不动。
+    </p>
+  </div>
+
+  {% if run and run.completed_at %}
+    <div class="card !p-4">
+      <div class="text-[10px] text-zinc-500 uppercase tracking-wider">上次 augury run</div>
+      <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm num">
+        <div>
+          <div class="text-[10px] text-zinc-600">完成时间</div>
+          <div class="text-zinc-200">{{ updated }}</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-zinc-600">耗时</div>
+          <div class="text-zinc-200">{{ run.duration_sec }}s</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-zinc-600">成功</div>
+          <div class="{% if run.ok > 0 %}text-emerald-500{% else %}text-zinc-600{% endif %}">{{ run.ok }}</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-zinc-600">异常</div>
+          <div class="{% if run.err > 0 %}text-amber-500{% else %}text-zinc-600{% endif %}">{{ run.err }}</div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card !p-4 text-xs text-zinc-500">还没有 run 记录。运行 <span class="num text-zinc-300">python -m augury run</span> 后回来看。</div>
+  {% endif %}
+
+  <div class="card !p-0 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="text-xs text-zinc-500">
+        <tr class="border-b border-zinc-800">
+          <th class="text-left  font-normal px-3 py-2">指标</th>
+          <th class="text-left  font-normal px-3 py-2">名称</th>
+          <th class="text-left  font-normal px-3 py-2">频率</th>
+          <th class="text-left  font-normal px-3 py-2 num">上次成功</th>
+          <th class="text-left  font-normal px-3 py-2 num">上次尝试</th>
+          <th class="text-left  font-normal px-3 py-2">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr class="border-b border-zinc-900 last:border-b-0 hover:bg-zinc-900/40
+                     {% if r.unhealthy %}text-amber-500{% else %}text-zinc-400{% endif %}">
+            <td class="px-3 py-2 num">
+              {% if r.source_url %}
+                <a href="{{ r.source_url }}" target="_blank" rel="noopener" class="hover:text-white">{{ r.id }}</a>
+              {% else %}
+                {{ r.id }}
+              {% endif %}
+            </td>
+            <td class="px-3 py-2 text-zinc-500">{{ r.title }}</td>
+            <td class="px-3 py-2 text-xs text-zinc-500">{{ r.frequency }}</td>
+            <td class="px-3 py-2 text-xs num">{{ r.last_success or '—' }}</td>
+            <td class="px-3 py-2 text-xs num">{{ r.last_attempt or '—' }}</td>
+            <td class="px-3 py-2 text-xs">
+              {% if r.unhealthy %}
+                <span class="group relative cursor-help">
+                  ⚠ 失败
+                  <span class="hidden group-hover:block absolute z-30 right-0 top-full mt-1 w-80 p-2 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800 rounded shadow-xl whitespace-pre-wrap normal-case tracking-normal font-normal">{{ r.error }}</span>
+                </span>
+              {% elif r.last_success %}
+                <span class="text-emerald-600">✓</span>
+              {% else %}
+                <span class="text-zinc-600">—</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
