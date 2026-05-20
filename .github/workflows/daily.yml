@@ -1,7 +1,10 @@
 name: daily
 on:
   schedule:
-    - cron: '5 17 * * *'  # TEST: UTC 17:05 = 北京 01:05 — revert to '0 0 * * *' (北京 08:00) after first cron fire is confirmed
+    # UTC 23:17 = 北京 07:17. 错开整点/UTC 午夜的拥堵时段 — GH Actions
+    # scheduled run 没有时间保证(常延迟 1-3h),用奇数分钟 + 提前量,
+    # 即便延迟也能在上午跑完。美股 EOD(收盘 20-21 UTC)此时已结算。
+    - cron: '17 23 * * *'
   workflow_dispatch:
   push:
     paths:
