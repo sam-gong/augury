@@ -38,43 +38,6 @@
 </div>
 {% endmacro %}
 
-{% macro gauge_card(g) %}
-<div class="card !p-3 relative">
-  {% if g.unhealthy %}
-    <span class="group absolute top-2 right-2 cursor-help">
-      <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-      <span class="hidden group-hover:block absolute z-30 right-0 top-full mt-1 w-64 p-2 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800 rounded shadow-xl whitespace-pre-wrap normal-case tracking-normal font-normal">
-        最近一次更新失败:{{ g.error or '未知错误' }}
-      </span>
-    </span>
-  {% endif %}
-  <div class="flex items-baseline justify-between gap-2">
-    <div class="flex items-center">
-      <div class="text-[10px] text-zinc-500 uppercase tracking-wider">{{ g.label }}</div>
-      {{ info_dot(g.description) }}
-    </div>
-    <div class="text-[10px] text-zinc-600 num {% if g.unhealthy %}mr-4{% endif %}">{{ g.date }}</div>
-  </div>
-  <div class="flex items-baseline gap-2 mt-1">
-    <div class="text-2xl font-semibold num text-zinc-100 leading-tight">{{ g.value }}</div>
-    {% if g.regime %}<div class="text-xs text-zinc-400">{{ g.regime }}</div>{% endif %}
-  </div>
-  <div class="relative mt-3 h-1.5 bg-zinc-800 rounded-sm">
-    {% for t_pct, _ in g.ticks %}
-      <div class="absolute top-0 bottom-0 w-px bg-zinc-700" style="left: {{ t_pct }}%"></div>
-    {% endfor %}
-    {% if g.axis_pct is defined %}
-      <div class="absolute -top-1.5 -bottom-1.5 w-px bg-zinc-500" style="left: {{ g.axis_pct }}%"></div>
-    {% endif %}
-    <div class="absolute -top-1 -bottom-1 w-[2px] bg-zinc-100 rounded-sm" style="left: calc({{ g.pct }}% - 1px)"></div>
-  </div>
-  <div class="flex justify-between text-[9px] text-zinc-600 mt-1 num">
-    <span>{{ g.range_min }}</span>
-    <span>{{ g.range_max }}</span>
-  </div>
-</div>
-{% endmacro %}
-
 {% block content %}
   {% if macro_cards %}
     <section class="mb-4">
@@ -105,7 +68,7 @@
         <h2 class="text-xs text-zinc-500 uppercase tracking-wider">情绪 / 风险</h2>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {% for g in gauge_cards %}{{ gauge_card(g) }}{% endfor %}
+        {% for g in gauge_cards %}{{ sparkline_card(g) }}{% endfor %}
       </div>
     </section>
   {% endif %}
@@ -117,7 +80,7 @@
         <span class="text-[10px] text-zinc-600">周更</span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {% for g in position_cards %}{{ gauge_card(g) }}{% endfor %}
+        {% for g in position_cards %}{{ sparkline_card(g) }}{% endfor %}
       </div>
     </section>
   {% endif %}

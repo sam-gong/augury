@@ -89,7 +89,8 @@ def _price_chart(df: pd.DataFrame, title: str) -> str:
             dtick="M12", tickformat="%Y",
         ),
     )
-    return fig.to_html(include_plotlyjs=False, full_html=False)
+    return fig.to_html(include_plotlyjs=False, full_html=False,
+                       config={"responsive": True})
 
 
 def _sparkline(s: pd.Series, color: str = "#3b82f6") -> str:
@@ -105,7 +106,7 @@ def _sparkline(s: pd.Series, color: str = "#3b82f6") -> str:
         xaxis=dict(visible=False), yaxis=dict(visible=False),
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _apply_transform(s: pd.Series, transform: str | None, is_rate: bool) -> pd.Series:
@@ -175,7 +176,7 @@ def _overlay_chart(main: pd.Series, leader: pd.Series, lead_months: int,
         ),
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _line_chart(s: pd.Series, y_label: str) -> str:
@@ -199,7 +200,7 @@ def _line_chart(s: pd.Series, y_label: str) -> str:
                    hoverformat="%Y-%m-%d"),
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _lines_chart(items: list[tuple[pd.Series, str, str]], y_label: str,
@@ -234,7 +235,7 @@ def _lines_chart(items: list[tuple[pd.Series, str, str]], y_label: str,
                    hoverformat="%Y-%m-%d"),
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _cycle_returns_chart(comp_pmi: pd.Series, spx: pd.Series,
@@ -299,7 +300,8 @@ def _cycle_returns_chart(comp_pmi: pd.Series, spx: pd.Series,
         hovermode="x unified",
         legend=dict(orientation="h", y=1.13, x=0),
     )
-    return fig.to_html(include_plotlyjs=False, full_html=False)
+    return fig.to_html(include_plotlyjs=False, full_html=False,
+                       config={"responsive": True})
 
 
 # ---------- formatters ----------
@@ -647,7 +649,7 @@ def _macro_sparkline(s: pd.Series, rangemode_tozero: bool = False) -> str:
                    rangemode="tozero" if rangemode_tozero else "normal"),
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _macro_card(series_id: str, label: str, fmt: str,
@@ -680,46 +682,61 @@ def _macro_card(series_id: str, label: str, fmt: str,
     }
 
 
-def _gauge_card(series_id: str, label: str, value_min: float, value_max: float,
-                fmt: str = "{:.0f}",
-                regime: callable | None = None,
-                ticks: list[tuple[float, str]] | None = None,
-                range_labels: tuple[str, str] | None = None,
-                description: str = "",
-                axis_value: float | None = None) -> dict | None:
-    """Horizontal-bar gauge card for bounded sentiment indicators (F&G, NAAIM).
-    The marker is clamped to the bar; the actual value is shown as text."""
-    s = _load_series(series_id)
+def _sentiment_sparkline(s: pd.Series, lo: float, hi: float,
+                         thresholds: list[float] | None = None,
+                         days: int = 730) -> str:
+    """Sparkline for bounded sentiment indicators. Unlike `_macro_sparkline`
+    (auto-scaled), the y-axis is pinned to the indicator's natural range
+    [lo, hi] so the absolute level reads correctly, and faint dotted lines
+    mark the regime thresholds — this is the context the old gauge bar gave."""
+    cutoff = s.index[-1] - pd.Timedelta(days=days)
+    s = s[s.index >= cutoff]
+    fig = go.Figure()
+    for t in (thresholds or []):
+        fig.add_hline(y=t, line=dict(color="#3f3f46", width=0.6, dash="dot"))
+    fig.add_trace(go.Scatter(
+        x=s.index, y=s.values, mode="lines",
+        line=dict(color="#888888", width=1.1),
+        hovertemplate="%{x|%Y-%m-%d}: %{y:.2f}<extra></extra>",
+    ))
+    fig.update_layout(
+        height=56, margin=dict(l=0, r=0, t=2, b=2),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False, range=[lo, hi]),
+    )
+    return fig.to_html(include_plotlyjs=False, full_html=False,
+                       config={"displayModeBar": False, "responsive": True})
+
+
+def _sentiment_card(series_id: str | None, label: str, lo: float, hi: float,
+                    fmt: str, regime: callable | None, thresholds: list[float],
+                    description: str, series: pd.Series | None = None) -> dict | None:
+    """Sparkline-card for a bounded sentiment indicator (same shape as
+    `_macro_card`, rendered by index.html's `sparkline_card` macro). Pass
+    `series` directly for computed series (e.g. VIX/VIX3M ratio)."""
+    s = series if series is not None else _load_series(series_id)
     if s is None or s.empty:
         return None
     s = s.dropna()
     if s.empty:
         return None
     last_v = float(s.iloc[-1])
-    last_d = s.index[-1].strftime("%Y-%m-%d")
-    span = value_max - value_min
-    pct = 0 if span <= 0 else max(0.0, min(100.0, (last_v - value_min) / span * 100))
-    out = {
-        "id": series_id, "label": label,
-        "value": fmt.format(last_v), "date": last_d,
+    return {
+        "id": series_id,
+        "label": label,
+        "value": fmt.format(last_v),
+        "date": s.index[-1].strftime("%Y-%m-%d"),
         "regime": regime(last_v) if regime else "",
-        "pct": pct,
-        "ticks": ticks or [],
-        "range_min": range_labels[0] if range_labels else f"{value_min:g}",
-        "range_max": range_labels[1] if range_labels else f"{value_max:g}",
         "description": description,
-        "unhealthy": indicators.is_unhealthy(series_id),
-        "error": (indicators.meta(series_id) or {}).get("last_error"),
+        "sparkline": _sentiment_sparkline(s, lo, hi, thresholds),
+        "unhealthy": indicators.is_unhealthy(series_id) if series_id else False,
+        "error": (indicators.meta(series_id) or {}).get("last_error") if series_id else None,
     }
-    if axis_value is not None and span > 0:
-        out["axis_pct"] = round((axis_value - value_min) / span * 100, 2)
-    return out
 
 
-def _vix_term_gauge() -> dict | None:
-    """VIX / VIX3M term structure as a ratio gauge. Backwardation (ratio > 1)
-    is the crisis switch — the bar is centered on 1.00 to make the line-crossing
-    instantly readable."""
+def _vix_term_ratio() -> pd.Series | None:
     vix = _load_series("VIX")
     vix3m = _load_series("VIX3M")
     if vix is None or vix3m is None:
@@ -727,32 +744,12 @@ def _vix_term_gauge() -> dict | None:
     df = pd.concat([vix.rename("vix"), vix3m.rename("vix3m")], axis=1).dropna()
     if df.empty:
         return None
-    ratio = (df["vix"] / df["vix3m"])
-    last_v = float(ratio.iloc[-1])
-    last_d = ratio.index[-1].strftime("%Y-%m-%d")
-    lo, hi = 0.70, 1.30
-    pct = max(0.0, min(100.0, (last_v - lo) / (hi - lo) * 100))
-    if last_v > 1.15:  regime = "崩盘"
-    elif last_v > 1.00: regime = "倒挂 · 危机"
-    elif last_v < 0.80: regime = "平静"
-    else:               regime = ""
-    return {
-        "id": "VIX_VIX3M",
-        "label": "VIX / VIX3M 期限结构",
-        "value": f"{last_v:.2f}",
-        "date": last_d,
-        "regime": regime,
-        "pct": pct,
-        "ticks": [(round((0.80 - lo) / (hi - lo) * 100, 2), "")],
-        "axis_pct": round((1.00 - lo) / (hi - lo) * 100, 2),  # 50
-        "range_min": "0.70 平静",
-        "range_max": "1.30 崩盘",
-        "description": "VIX 当月 / VIX 3 月期权波动率比。正常 contango (<1) = 远期不确定性更高;倒挂 (>1) = 短期恐慌爆发,是危机模式的物理开关。中线 1.00 在量尺上显式标出。",
-    }
+    return df["vix"] / df["vix3m"]
 
 
 def _sentiment_gauges() -> list[dict]:
-    """Bounded sentiment / risk gauges: CNN F&G, VIX term structure, SKEW."""
+    """Bounded sentiment / risk indicators: CNN F&G, VIX term structure, SKEW.
+    Rendered as fixed-range sparklines with threshold reference lines."""
     def fng_regime(v):
         if v < 20: return "极度恐慌"
         if v < 40: return "恐慌"
@@ -766,27 +763,32 @@ def _sentiment_gauges() -> list[dict]:
         if v > 140: return "高度警惕"
         return ""
 
+    def vix_ratio_regime(v):
+        if v > 1.15: return "崩盘"
+        if v > 1.00: return "倒挂 · 危机"
+        if v < 0.80: return "平静"
+        return ""
+
     cards = [
-        _gauge_card("CNN_FEAR_GREED", "CNN 恐惧 / 贪婪",
-                    value_min=0, value_max=100, fmt="{:.0f}",
-                    regime=fng_regime,
-                    ticks=[(25, ""), (50, ""), (75, "")],
-                    range_labels=("0 恐慌", "100 贪婪"),
-                    description="CNN 综合 7 项市场指标(动量、强势、宽度、看涨看跌、垃圾债需求、波动率、避险需求)合成的情绪仪表盘。<20 极度恐慌(常为历史底部);>80 极度贪婪。"),
-        _vix_term_gauge(),
-        _gauge_card("SKEW", "SKEW 尾部风险",
-                    value_min=100, value_max=160, fmt="{:.1f}",
-                    regime=skew_regime,
-                    ticks=[],
-                    axis_value=140,
-                    range_labels=("100 正态", "160 极端"),
-                    description="CBOE SKEW 指数,机构对深价外看跌期权的定价 = 黑天鹅尾部风险溢价。100 = 正态分布;<120 机构毫无防备(易被突袭);>140 高度警惕;>150 极端防备(常为暴风雨前夜)。"),
+        _sentiment_card("CNN_FEAR_GREED", "CNN 恐惧 / 贪婪",
+                        lo=0, hi=100, fmt="{:.0f}", regime=fng_regime,
+                        thresholds=[20, 80],
+                        description="CNN 综合 7 项市场指标(动量、强势、宽度、看涨看跌、垃圾债需求、波动率、避险需求)合成的情绪仪表盘。<20 极度恐慌(常为历史底部);>80 极度贪婪。曲线参考线 = 20 / 80。"),
+        _sentiment_card("VIX_VIX3M", "VIX / VIX3M 期限结构",
+                        lo=0.70, hi=1.30, fmt="{:.2f}", regime=vix_ratio_regime,
+                        thresholds=[1.00],
+                        description="VIX 当月 / VIX 3 月期权波动率比。正常 contango (<1) = 远期不确定性更高;倒挂 (>1) = 短期恐慌爆发,是危机模式的物理开关。曲线参考线 = 1.00。",
+                        series=_vix_term_ratio()),
+        _sentiment_card("SKEW", "SKEW 尾部风险",
+                        lo=100, hi=160, fmt="{:.1f}", regime=skew_regime,
+                        thresholds=[140],
+                        description="CBOE SKEW 指数,机构对深价外看跌期权的定价 = 黑天鹅尾部风险溢价。100 = 正态分布;<120 机构毫无防备(易被突袭);>140 高度警惕;>150 极端防备(常为暴风雨前夜)。曲线参考线 = 140。"),
     ]
     return [c for c in cards if c]
 
 
 def _position_gauges() -> list[dict]:
-    """Position gauge in its own section. NAAIM is weekly-updated investment
+    """Position indicator in its own section. NAAIM is weekly-updated investment
     manager survey, distinct cadence from the daily sentiment row."""
     def naaim_regime(v):
         if v < 30:  return "机构极度空仓"
@@ -794,12 +796,10 @@ def _position_gauges() -> list[dict]:
         return ""
 
     cards = [
-        _gauge_card("NAAIM_EXPOSURE", "NAAIM 机构仓位",
-                    value_min=0, value_max=150, fmt="{:.0f}%",
-                    regime=naaim_regime,
-                    ticks=[(20, ""), (67, "")],  # 30/150, 100/150
-                    range_labels=("0% 空仓", "150% 满杠"),
-                    description="全美主动投资经理协会(NAAIM)调查的实际仓位敞口(0-200%)。<30 极度空仓(常为左侧买点);>100 加杠杆。比 AAII 散户调查更硬核 — 真金白银仓位而非问卷情绪。周更(周四发布)。"),
+        _sentiment_card("NAAIM_EXPOSURE", "NAAIM 机构仓位",
+                        lo=0, hi=150, fmt="{:.0f}%", regime=naaim_regime,
+                        thresholds=[30, 100],
+                        description="全美主动投资经理协会(NAAIM)调查的实际仓位敞口(0-200%)。<30 极度空仓(常为左侧买点);>100 加杠杆。比 AAII 散户调查更硬核 — 真金白银仓位而非问卷情绪。周更(周四发布)。曲线参考线 = 30 / 100。"),
     ]
     return [c for c in cards if c]
 
@@ -881,6 +881,7 @@ def render_strategy_overview(prices: dict) -> None:
         updated=updated, run=run, page="overview",
         page_cfg=cfg, signals=_signals_status(prices),
         pages=layout.sidebar_strategy_pages(),
+        section_nav=layout.sidebar_strategy_pages(),
     )
     (DOCS_DIR / "overview.html").write_text(html)
 
@@ -909,6 +910,7 @@ def render_macro_page(page_key: str, prices: dict) -> None:
         updated=updated, run=run, page=page_key,
         page_cfg=cfg, sections=sections,
         pages=layout.sidebar_pages(),
+        section_nav=layout.sidebar_pages(),
     )
     (DOCS_DIR / f"{page_key}.html").write_text(html)
 
@@ -989,7 +991,7 @@ def _strategy_price_chart(close: pd.Series, overlay_lines, trades,
         ),
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _equity_chart(equity: pd.Series, bh_equity: pd.Series,
@@ -1028,7 +1030,7 @@ def _equity_chart(equity: pd.Series, bh_equity: pd.Series,
         xaxis=xaxis,
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _drawdown_chart(drawdown: pd.Series,
@@ -1052,7 +1054,7 @@ def _drawdown_chart(drawdown: pd.Series,
         xaxis=xaxis,
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 def _trade_pnl_chart(trades) -> str:
@@ -1086,7 +1088,7 @@ def _trade_pnl_chart(trades) -> str:
         bargap=0.15,
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 # Breadth thresholds (right-side cross-up) — see 技巧专区/指数底用市场宽度.
@@ -1253,7 +1255,7 @@ def _breadth_section(ticker: str, name: str, breadth_id: str,
     )
 
     chart_html = fig.to_html(include_plotlyjs=False, full_html=False,
-                             config={"displayModeBar": False})
+                             config={"displayModeBar": False, "responsive": True})
     return {
         "ticker": ticker,
         "name": name,
@@ -1400,7 +1402,7 @@ def _learning_chart(df: pd.DataFrame) -> str:
         ],
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False})
+                       config={"displayModeBar": False, "responsive": True})
 
 
 # ---------- formatters for strategy metrics ----------
@@ -1752,6 +1754,7 @@ def render_strategy_page(page_key: str, prices: dict) -> None:
         page_cfg=cfg, assets=assets,
         breadth_sections=breadth_sections,
         pages=layout.sidebar_strategy_pages(),
+        section_nav=layout.sidebar_strategy_pages(),
     )
     (DOCS_DIR / f"{page_key}.html").write_text(html)
 
