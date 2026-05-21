@@ -204,13 +204,13 @@
       </a>
     </header>
 
-    {# Mobile-only section nav: the desktop left sidebar flattened into a
-       horizontal sticky chip row. Only macro / strategy renders pass
-       `section_nav`; index & health omit it (no sub-pages to switch). #}
-    {% if section_nav %}
+    {# Mobile-only section nav: the desktop left sidebar (`pages`) flattened
+       into a horizontal sticky chip row. Only macro / strategy renders pass
+       `pages`; index & health omit it (no sub-pages to switch). #}
+    {% if pages %}
       <nav class="md:hidden chip-scroll bg-[#0a0a0a] border-b border-zinc-800 overflow-x-auto">
         <div class="flex gap-1.5 px-4 py-2 whitespace-nowrap">
-          {% for key, p in section_nav %}
+          {% for key, p in pages %}
             <a href="{{ key }}.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
                {% if page == key %}bg-zinc-100 text-zinc-900 font-medium{% else %}text-zinc-400 bg-zinc-900/80 hover:bg-zinc-800{% endif %}">{{ p.label }}</a>
           {% endfor %}

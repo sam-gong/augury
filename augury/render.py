@@ -628,25 +628,33 @@ def _signals_status(prices: dict) -> list[dict]:
     return rows
 
 
-def _macro_sparkline(s: pd.Series, rangemode_tozero: bool = False) -> str:
-    """Restrained gray sparkline for the index page macro stress cards.
-    Two-year window, no axes, no hover decoration. `rangemode_tozero` forces
-    y-axis to include 0 — used by RRP so the eye sees the absolute distance
-    to a zero floor."""
+def _mini_sparkline(s: pd.Series, rangemode_tozero: bool = False,
+                    y_range: list[float] | None = None,
+                    thresholds: list[float] | None = None) -> str:
+    """Restrained gray mini-sparkline for index-page cards. Two-year window,
+    no axes, no hover decoration. By default the y-axis auto-scales
+    (`rangemode_tozero` forces a zero floor — used by RRP). Pass `y_range`
+    to pin the axis to a bounded indicator's natural range (e.g. F&G 0–100)
+    and `thresholds` to draw faint regime reference lines."""
     cutoff = s.index[-1] - pd.Timedelta(days=730)
     s = s[s.index >= cutoff]
-    fig = go.Figure(go.Scatter(
+    fig = go.Figure()
+    for t in (thresholds or []):
+        fig.add_hline(y=t, line=dict(color="#3f3f46", width=0.6, dash="dot"))
+    fig.add_trace(go.Scatter(
         x=s.index, y=s.values, mode="lines",
         line=dict(color="#888888", width=1.1),
         hovertemplate="%{x|%Y-%m-%d}: %{y:.2f}<extra></extra>",
     ))
+    yaxis = dict(visible=False)
+    if y_range is not None:
+        yaxis["range"] = y_range
+    else:
+        yaxis["rangemode"] = "tozero" if rangemode_tozero else "normal"
     fig.update_layout(
         height=56, margin=dict(l=0, r=0, t=2, b=2),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        showlegend=False,
-        xaxis=dict(visible=False),
-        yaxis=dict(visible=False,
-                   rangemode="tozero" if rangemode_tozero else "normal"),
+        showlegend=False, xaxis=dict(visible=False), yaxis=yaxis,
     )
     return fig.to_html(include_plotlyjs=False, full_html=False,
                        config={"displayModeBar": False, "responsive": True})
@@ -676,41 +684,13 @@ def _macro_card(series_id: str, label: str, fmt: str,
         "date": last_d,
         "regime": regime(last_v) if regime else "",
         "description": description,
-        "sparkline": _macro_sparkline(s, rangemode_tozero=rangemode_tozero),
+        "sparkline": _mini_sparkline(s, rangemode_tozero=rangemode_tozero),
         "unhealthy": indicators.is_unhealthy(series_id),
         "error": (indicators.meta(series_id) or {}).get("last_error"),
     }
 
 
-def _sentiment_sparkline(s: pd.Series, lo: float, hi: float,
-                         thresholds: list[float] | None = None,
-                         days: int = 730) -> str:
-    """Sparkline for bounded sentiment indicators. Unlike `_macro_sparkline`
-    (auto-scaled), the y-axis is pinned to the indicator's natural range
-    [lo, hi] so the absolute level reads correctly, and faint dotted lines
-    mark the regime thresholds — this is the context the old gauge bar gave."""
-    cutoff = s.index[-1] - pd.Timedelta(days=days)
-    s = s[s.index >= cutoff]
-    fig = go.Figure()
-    for t in (thresholds or []):
-        fig.add_hline(y=t, line=dict(color="#3f3f46", width=0.6, dash="dot"))
-    fig.add_trace(go.Scatter(
-        x=s.index, y=s.values, mode="lines",
-        line=dict(color="#888888", width=1.1),
-        hovertemplate="%{x|%Y-%m-%d}: %{y:.2f}<extra></extra>",
-    ))
-    fig.update_layout(
-        height=56, margin=dict(l=0, r=0, t=2, b=2),
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        showlegend=False,
-        xaxis=dict(visible=False),
-        yaxis=dict(visible=False, range=[lo, hi]),
-    )
-    return fig.to_html(include_plotlyjs=False, full_html=False,
-                       config={"displayModeBar": False, "responsive": True})
-
-
-def _sentiment_card(series_id: str | None, label: str, lo: float, hi: float,
+def _sentiment_card(series_id: str, label: str, lo: float, hi: float,
                     fmt: str, regime: callable | None, thresholds: list[float],
                     description: str, series: pd.Series | None = None) -> dict | None:
     """Sparkline-card for a bounded sentiment indicator (same shape as
@@ -730,9 +710,9 @@ def _sentiment_card(series_id: str | None, label: str, lo: float, hi: float,
         "date": s.index[-1].strftime("%Y-%m-%d"),
         "regime": regime(last_v) if regime else "",
         "description": description,
-        "sparkline": _sentiment_sparkline(s, lo, hi, thresholds),
-        "unhealthy": indicators.is_unhealthy(series_id) if series_id else False,
-        "error": (indicators.meta(series_id) or {}).get("last_error") if series_id else None,
+        "sparkline": _mini_sparkline(s, y_range=[lo, hi], thresholds=thresholds),
+        "unhealthy": indicators.is_unhealthy(series_id),
+        "error": (indicators.meta(series_id) or {}).get("last_error"),
     }
 
 
@@ -866,7 +846,6 @@ def render_index(prices: dict) -> None:
         gauge_cards=_sentiment_gauges(),
         position_cards=_position_gauges(),
         updated=updated, run=run, page="index",
-        pages=layout.sidebar_pages(),
     )
     (DOCS_DIR / "index.html").write_text(html)
 
@@ -881,7 +860,6 @@ def render_strategy_overview(prices: dict) -> None:
         updated=updated, run=run, page="overview",
         page_cfg=cfg, signals=_signals_status(prices),
         pages=layout.sidebar_strategy_pages(),
-        section_nav=layout.sidebar_strategy_pages(),
     )
     (DOCS_DIR / "overview.html").write_text(html)
 
@@ -910,7 +888,6 @@ def render_macro_page(page_key: str, prices: dict) -> None:
         updated=updated, run=run, page=page_key,
         page_cfg=cfg, sections=sections,
         pages=layout.sidebar_pages(),
-        section_nav=layout.sidebar_pages(),
     )
     (DOCS_DIR / f"{page_key}.html").write_text(html)
 
@@ -1754,7 +1731,6 @@ def render_strategy_page(page_key: str, prices: dict) -> None:
         page_cfg=cfg, assets=assets,
         breadth_sections=breadth_sections,
         pages=layout.sidebar_strategy_pages(),
-        section_nav=layout.sidebar_strategy_pages(),
     )
     (DOCS_DIR / f"{page_key}.html").write_text(html)
 
