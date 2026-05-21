@@ -37,7 +37,8 @@
   {% endif %}
 
   <div class="card !p-0 overflow-hidden">
-    <table class="w-full text-sm">
+   <div class="overflow-x-auto chip-scroll">
+    <table class="w-full text-sm min-w-[680px]">
       <thead class="text-xs text-zinc-500">
         <tr class="border-b border-zinc-800">
           <th class="text-left  font-normal px-3 py-2">指标</th>
@@ -79,6 +80,7 @@
         {% endfor %}
       </tbody>
     </table>
+   </div>
   </div>
 </div>
 {% endblock %}

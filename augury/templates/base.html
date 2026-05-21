@@ -11,9 +11,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <style>
     body { background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    /* Mobile: stop any over-wide child (e.g. a Plotly chart that rendered
+       before its responsive resize settled) from expanding the layout
+       viewport past the `md` breakpoint — that's what made the section chip
+       bar vanish on the charts-heavy 指数 page (desktop media query kicked in).
+       `clip` (not `hidden`) prevents horizontal scroll WITHOUT creating a
+       scroll container, so `position: sticky` keeps working. */
+    html, body { overflow-x: clip; }
+    .plotly-graph-div, .js-plotly-plot { max-width: 100%; }
     .brand { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; letter-spacing: 0.005em; }
     .card { background: #111; border: 1px solid #1f1f1f; border-radius: 8px; padding: 16px; }
     .num { font-variant-numeric: tabular-nums; }
+    /* Mobile section-nav chip row: hide the scrollbar but keep it scrollable. */
+    .chip-scroll::-webkit-scrollbar { display: none; }
+    .chip-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     .nav a { color: #999; padding: 4px 12px; border-radius: 4px; transition: all 120ms; }
     .nav a:hover { color: #fff; background: #1f1f1f; }
     .nav a.active { color: #fff; background: #1f1f1f; }
@@ -174,24 +185,40 @@
   </style>
 </head>
 <body data-page="{{ page }}">
-  <header class="sticky top-0 z-40 bg-[#0a0a0a] border-b border-zinc-800 px-6 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-6">
-      <h1 class="brand text-2xl">Augury</h1>
-      <nav class="nav flex gap-1 text-sm">
-        <a href="index.html" class="{% if page == 'index' %}active{% endif %}">大盘</a>
-        <a href="overview.html" class="{% if page in ['overview', 'indices', 'stocks', 'learning', 'crypto'] %}active{% endif %}">策略</a>
-        <a href="cycle.html" class="{% if page in ['cycle', 'employment', 'inflation', 'background'] %}active{% endif %}">宏观</a>
+  <div class="sticky top-0 z-40">
+    <header class="bg-[#0a0a0a] border-b border-zinc-800 px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-4 md:gap-6 min-w-0">
+        <h1 class="brand text-xl md:text-2xl shrink-0">Augury</h1>
+        <nav class="nav flex gap-1 text-sm">
+          <a href="index.html" class="{% if page == 'index' %}active{% endif %}">大盘</a>
+          <a href="overview.html" class="{% if page in ['overview', 'indices', 'stocks', 'learning', 'crypto'] %}active{% endif %}">策略</a>
+          <a href="cycle.html" class="{% if page in ['cycle', 'employment', 'inflation', 'background'] %}active{% endif %}">宏观</a>
+        </nav>
+      </div>
+      <a href="health.html" class="text-xs num flex items-center gap-2 px-2 py-1 rounded transition-colors shrink-0
+         {% if run and run.err and run.err > 0 %}text-amber-500 hover:bg-amber-500/10{% else %}text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300{% endif %}"
+         title="点击查看数据健康详情">
+        <span class="inline-block w-1.5 h-1.5 rounded-full {% if run and run.err and run.err > 0 %}bg-amber-500{% else %}bg-zinc-600{% endif %}"></span>
+        <span class="hidden sm:inline">{{ updated }}</span>
+        {% if run and run.err and run.err > 0 %}<span>· {{ run.err }} 异常</span>{% endif %}
+      </a>
+    </header>
+
+    {# Mobile-only section nav: the desktop left sidebar flattened into a
+       horizontal sticky chip row. Only macro / strategy renders pass
+       `section_nav`; index & health omit it (no sub-pages to switch). #}
+    {% if section_nav %}
+      <nav class="md:hidden chip-scroll bg-[#0a0a0a] border-b border-zinc-800 overflow-x-auto">
+        <div class="flex gap-1.5 px-4 py-2 whitespace-nowrap">
+          {% for key, p in section_nav %}
+            <a href="{{ key }}.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
+               {% if page == key %}bg-zinc-100 text-zinc-900 font-medium{% else %}text-zinc-400 bg-zinc-900/80 hover:bg-zinc-800{% endif %}">{{ p.label }}</a>
+          {% endfor %}
+        </div>
       </nav>
-    </div>
-    <a href="health.html" class="text-xs num flex items-center gap-2 px-2 py-1 rounded transition-colors
-       {% if run and run.err and run.err > 0 %}text-amber-500 hover:bg-amber-500/10{% else %}text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300{% endif %}"
-       title="点击查看数据健康详情">
-      <span class="inline-block w-1.5 h-1.5 rounded-full {% if run and run.err and run.err > 0 %}bg-amber-500{% else %}bg-zinc-600{% endif %}"></span>
-      <span>{{ updated }}</span>
-      {% if run and run.err and run.err > 0 %}<span>· {{ run.err }} 异常</span>{% endif %}
-    </a>
-  </header>
-  <main class="p-6 max-w-[1600px] mx-auto">
+    {% endif %}
+  </div>
+  <main class="p-4 md:p-6 max-w-[1600px] mx-auto">
     {% block content %}{% endblock %}
   </main>
   <script>
