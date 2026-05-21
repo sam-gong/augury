@@ -73,17 +73,28 @@
                                 border: 1px solid rgba(34,197,94,0.4); }
     .signal-tag.pending-sell { background: transparent; color: #f87171;
                                 border: 1px solid rgba(239,68,68,0.4); }
-    /* Metrics row: flex bar that wraps gracefully */
-    .metrics-row { display: flex; flex-wrap: wrap; gap: 0;
-                   border-top: 1px solid #1f1f1f; border-bottom: 1px solid #1f1f1f;
-                   padding: 8px 0; }
-    .metric { flex: 1 0 auto; min-width: 70px; padding: 0 12px;
-              border-right: 1px solid #1a1a1a; }
-    .metric:last-child { border-right: none; }
-    .metric-label { font-size: 9px; color: #6b7280; text-transform: uppercase;
-                    letter-spacing: 0.05em; }
-    .metric-value { font-size: 13px; color: #e5e5e5; font-weight: 500;
-                    margin-top: 1px; }
+    /* Strategy-vs-buy&hold table: two aligned rows, scan a column to compare.
+       Header cells carry native title= tooltips (custom ones would be clipped
+       by the horizontal scroll wrapper). */
+    .metrics-compare { border-top: 1px solid #1f1f1f; border-bottom: 1px solid #1f1f1f; }
+    .metrics-compare table { width: 100%; border-collapse: collapse; }
+    .metrics-compare th { font-size: 9px; color: #6b7280; font-weight: normal;
+                          text-transform: uppercase; letter-spacing: 0.05em;
+                          text-align: right; white-space: nowrap;
+                          padding: 7px 12px 2px; cursor: help; }
+    .metrics-compare td { font-size: 13px; text-align: right; white-space: nowrap;
+                          padding: 1px 12px 7px; font-variant-numeric: tabular-nums; }
+    .metrics-compare th:first-child, .metrics-compare td:first-child {
+        text-align: left; font-size: 9px; color: #6b7280;
+        text-transform: uppercase; letter-spacing: 0.05em; padding-left: 0; }
+    .metrics-compare .row-strat td, .metrics-compare .row-bh td {
+        color: #e5e5e5; font-weight: 500; }
+    /* Metrics a perpetual hold has no equivalent for (trade stats) */
+    .metrics-compare .row-bh td.na { color: #3f3f46; text-align: center; }
+    /* B&H entry price, annotated on the row label */
+    .metrics-compare .bh-entry { color: #52525b; font-weight: normal;
+                                 font-variant-numeric: tabular-nums;
+                                 text-transform: none; letter-spacing: 0; }
     .sub-chart { background: #0d0d0d; border-radius: 6px; padding: 4px; }
     /* Strategy section — visually separates asset (top: name, price, K-line)
        from strategy view (below: spec, metrics, equity, trades). Thin top
@@ -132,35 +143,6 @@
                   border: 1px solid #27272a; border-radius: 4px;
                   padding: 2px 8px; cursor: pointer; transition: all 120ms; }
     .date-reset:hover { color: #d4d4d8; border-color: #3f3f46; }
-    /* Metric tooltip — hover (or keyboard focus) on a metric cell to reveal */
-    .metric { position: relative; cursor: help; }
-    .metric-info-icon { display: inline-flex; align-items: center; justify-content: center;
-                         width: 11px; height: 11px; margin-left: 4px;
-                         font-size: 8px; font-weight: 600; font-style: italic;
-                         color: #525252; border: 1px solid #2a2a2a;
-                         border-radius: 50%; vertical-align: 1px;
-                         transition: color 120ms, border-color 120ms; }
-    .metric:hover .metric-info-icon, .metric:focus .metric-info-icon {
-        color: #a1a1aa; border-color: #3f3f46;
-    }
-    .metric-tooltip { position: absolute; top: calc(100% + 6px); left: 50%;
-                      transform: translateX(-50%);
-                      width: 240px; padding: 8px 10px;
-                      background: #18181b; border: 1px solid #2a2a2a;
-                      border-radius: 6px; color: #d4d4d8;
-                      font-size: 11px; line-height: 1.5;
-                      font-variant-numeric: normal; letter-spacing: 0;
-                      text-transform: none;
-                      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-                      opacity: 0; pointer-events: none;
-                      transition: opacity 120ms;
-                      z-index: 50; }
-    .metric-tooltip::before { content: ''; position: absolute; top: -5px; left: 50%;
-                              transform: translateX(-50%) rotate(45deg);
-                              width: 8px; height: 8px;
-                              background: #18181b;
-                              border-top: 1px solid #2a2a2a; border-left: 1px solid #2a2a2a; }
-    .metric:hover .metric-tooltip, .metric:focus .metric-tooltip { opacity: 1; }
     .trade-table summary::-webkit-details-marker { display: none; }
     .trade-table summary::before { content: '▸ '; color: #525252; transition: transform 120ms; display: inline-block; }
     .trade-table[open] summary::before { content: '▾ '; }
@@ -199,7 +181,7 @@
          text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
          title="点击查看数据健康详情">
         <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
-        <span class="hidden sm:inline">2026-05-21 05:33 UTC</span>
+        <span class="hidden sm:inline">2026-05-21 10:21 UTC</span>
         
       </a>
     </header>
@@ -224,11 +206,11 @@
       <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm num">
         <div>
           <div class="text-[10px] text-zinc-600">完成时间</div>
-          <div class="text-zinc-200">2026-05-21 05:33 UTC</div>
+          <div class="text-zinc-200">2026-05-21 10:21 UTC</div>
         </div>
         <div>
           <div class="text-[10px] text-zinc-600">耗时</div>
-          <div class="text-zinc-200">109.3s</div>
+          <div class="text-zinc-200">107.2s</div>
         </div>
         <div>
           <div class="text-[10px] text-zinc-600">成功</div>
@@ -266,8 +248,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Apple</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -284,8 +266,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">AppLovin</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -302,8 +284,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Atlanta Fed Wage Growth Tracker (3mma Overall)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:02Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:02Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -320,8 +302,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">AutoZone</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -338,8 +320,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ICE BofA US High Yield OAS</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:54Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:54Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -356,8 +338,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">BLS New Tenant Rent Index (YoY %)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">quarterly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:38Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:38Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:04Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:04Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -374,8 +356,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Bitcoin / USD</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -392,8 +374,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Average Hourly Earnings (Production/Nonsupervisory)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:02Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:02Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -410,8 +392,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Chicago Fed Activity Index</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:32Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:32Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:50Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:50Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -428,8 +410,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Labor Force Participation</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:01Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:01Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -446,8 +428,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">CNN Fear &amp; Greed</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -464,8 +446,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Copper/Gold Ratio (×100)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -482,8 +464,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">CPI All Items</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:56Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:56Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -500,8 +482,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Core CPI</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:56Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:56Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -518,8 +500,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">CPI Medical Care</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:58Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:58Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -536,8 +518,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">China Total Credit to Private NFCs (BIS, proxy for Credit Impulse)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">quarterly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:52Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -554,8 +536,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Case-Shiller US National HPI (NSA)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:58Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:58Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -572,8 +554,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">CPI Shelter</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:58Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:58Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -590,8 +572,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">10Y Treasury</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:53Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:53Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -608,8 +590,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">2Y Treasury</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:52Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -626,8 +608,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Fed FCI-G (1yr lookback)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:51Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:51Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -644,8 +626,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Fed Funds Rate</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:52Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -662,8 +644,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Fair Isaac</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -680,8 +662,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Philly Fed Current Activity</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:31Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:31Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:49Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:49Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -698,8 +680,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Philly Fed Future Activity 6m</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:31Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:31Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:50Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:50Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -716,8 +698,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Initial Claims</td>
             <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:00Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:00Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -734,8 +716,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Industrial Production</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:51Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:51Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -752,8 +734,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Import Price Index</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:57Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:57Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -770,8 +752,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM Composite PMI (30% Mfg + 70% Svc)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:30Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:30Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -788,8 +770,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM Manufacturing Inventories</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:29Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:29Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:45Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:45Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -806,8 +788,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM Manufacturing Prices</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:30Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:30Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:48Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:48Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -824,8 +806,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM Manufacturing New Orders</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:13Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:08Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:08Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -842,8 +824,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM Services PMI (NMI)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:13Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:07Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:07Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -860,8 +842,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM New Orders − Inventories</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:30Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:30Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -878,8 +860,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ISM Manufacturing PMI</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:13Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:13Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:06Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:06Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -896,8 +878,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">JOLTS Job Openings</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:01Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:01Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -914,8 +896,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">JOLTS Quits Rate</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:37Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:01Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:01Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -932,8 +914,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Eli Lilly</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -950,8 +932,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">M2 Money Stock</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:54Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:54Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -968,8 +950,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Meta</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -986,8 +968,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">UMich 1Y Inflation Expectation</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:59Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:59Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1004,8 +986,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">ICE BofA MOVE</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1022,8 +1004,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">NAAIM Exposure Index</td>
             <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1040,8 +1022,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Nasdaq 100 % above 50DMA</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:53Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:53Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:44Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:44Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1058,8 +1040,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Nasdaq 100</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1076,8 +1058,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Chicago Fed NFCI</td>
             <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:33Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:51Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:51Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1094,8 +1076,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Netflix</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1112,8 +1094,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">NVIDIA</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1130,8 +1112,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">NY Fed SCE 1Y Inflation Expectation (Median)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:25Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:25Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1148,8 +1130,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">OECD CLI Month-over-Month Diffusion (%)</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:41Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:26Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:26Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1166,8 +1148,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">O&#39;Reilly Auto</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1184,8 +1166,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Nonfarm Payrolls</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:00Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:00Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1202,8 +1184,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Core PCE</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:56Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:56Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1220,8 +1202,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Palantir</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1238,8 +1220,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">PPI All Commodities</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:57Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:57Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1256,8 +1238,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Nasdaq 100 ETF</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1274,8 +1256,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Rocket Lab</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1292,8 +1274,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Overnight Reverse Repo</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:35Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:55Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:55Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1310,8 +1292,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">S&amp;P 500 % above 50DMA</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:32:06Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:32:06Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:46Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:46Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1328,8 +1310,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">CBOE SKEW Index</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1346,8 +1328,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">S&amp;P 500</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1364,8 +1346,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">S&amp;P 500 ETF</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1382,8 +1364,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">10Y-2Y Spread</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:53Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:53Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1400,8 +1382,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">10Y Breakeven Inflation</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:59Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:59Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1418,8 +1400,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">5Y Breakeven Inflation</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:59Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:59Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1436,8 +1418,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Tesla</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1454,8 +1436,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Unemployment Rate</td>
             <td class="px-3 py-2 text-xs text-zinc-500">monthly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:36Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:00Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:21:00Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1472,8 +1454,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">US 10Y Yield</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1490,8 +1472,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">VIX</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1508,8 +1490,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">VIX 3-Month</td>
             <td class="px-3 py-2 text-xs text-zinc-500">daily</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:31:52Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:19:43Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1526,8 +1508,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Fed Balance Sheet</td>
             <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:54Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:54Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1544,8 +1526,8 @@
             </td>
             <td class="px-3 py-2 text-zinc-500">Treasury General Acct</td>
             <td class="px-3 py-2 text-xs text-zinc-500">weekly</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
-            <td class="px-3 py-2 text-xs num">2026-05-21T05:33:34Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:55Z</td>
+            <td class="px-3 py-2 text-xs num">2026-05-21T10:20:55Z</td>
             <td class="px-3 py-2 text-xs">
               
                 <span class="text-emerald-600">✓</span>
@@ -1560,6 +1542,608 @@
 </div>
 
   </main>
+  <script>// Backtest engine — vectorbt `from_signals` default semantics, hand-ported to JS.
+// SINGLE SOURCE OF TRUTH: render.py inlines this into every page; parity_check.mjs
+// imports it for headless JS-vs-Python parity. Keep it DOM-free so browser and
+// node run the identical code.
+
+var Backtest = (function() {
+  // pandas .rolling(n).mean() — NaN for the first n-1 elements.
+  function sma(arr, n) {
+    var out = new Array(arr.length);
+    var sum = 0;
+    for (var i = 0; i < arr.length; i++) {
+      sum += arr[i];
+      if (i >= n) sum -= arr[i - n];
+      out[i] = (i >= n - 1) ? sum / n : NaN;
+    }
+    return out;
+  }
+
+  function signalsSmaBand(close, p) {
+    var ma = sma(close, p.ma);
+    var en = new Array(close.length);
+    var ex = new Array(close.length);
+    var up = new Array(close.length);
+    var lo = new Array(close.length);
+    for (var i = 0; i < close.length; i++) {
+      if (isNaN(ma[i])) {
+        en[i] = false; ex[i] = false;
+        up[i] = NaN; lo[i] = NaN;
+        continue;
+      }
+      up[i] = ma[i] * (1 + p.threshold);
+      lo[i] = ma[i] * (1 - p.threshold);
+      // Cross-based, not level-based (mirrors augury.strategies.SmaBand):
+      // enter on a cross UP through the upper band, exit on a cross DOWN
+      // through the lower band — "already above" is not a crossing.
+      var prevUp = i > 0 ? up[i - 1] : NaN;
+      var prevLo = i > 0 ? lo[i - 1] : NaN;
+      en[i] = !isNaN(prevUp) && close[i] > up[i] && close[i - 1] <= prevUp;
+      ex[i] = !isNaN(prevLo) && close[i] < lo[i] && close[i - 1] >= prevLo;
+    }
+    return {entries: en, exits: ex, overlays: {ma: ma, upper: up, lower: lo}};
+  }
+
+  function signalsSmaCross(close, p) {
+    var f = sma(close, p.fast);
+    var s = sma(close, p.slow);
+    var en = new Array(close.length);
+    var ex = new Array(close.length);
+    for (var i = 0; i < close.length; i++) {
+      // Cross-based, not level-based (mirrors augury.strategies.SmaCross):
+      // golden cross to enter, death cross to exit — "already above" is
+      // not a crossing.
+      if (isNaN(f[i]) || isNaN(s[i]) || i === 0 || isNaN(f[i-1]) || isNaN(s[i-1])) {
+        en[i] = false; ex[i] = false; continue;
+      }
+      en[i] = f[i] > s[i] && f[i-1] <= s[i-1];
+      ex[i] = f[i] < s[i] && f[i-1] >= s[i-1];
+    }
+    return {entries: en, exits: ex, overlays: {ma_fast: f, ma_slow: s}};
+  }
+
+  // ThermoBand: the thermometer is too expensive to recompute in JS
+  // (8 oscillators + composite). The server hands us a pre-computed
+  // thermo array aligned to `close`; we apply level-crossing logic.
+  // `null` entries in `thermo` mark warmup bars where no signal fires.
+  function signalsThermo(close, p, thermo) {
+    var n = close.length;
+    var en = new Array(n), ex = new Array(n);
+    en[0] = false; ex[0] = false;
+    for (var i = 1; i < n; i++) {
+      en[i] = false; ex[i] = false;
+      var t = thermo[i], tp = thermo[i - 1];
+      if (t == null || tp == null) continue;
+      for (var j = 0; j < p.enter_up.length; j++) {
+        var l = p.enter_up[j];
+        if (t > l && tp <= l) en[i] = true;
+      }
+      for (var j = 0; j < p.exit_down.length; j++) {
+        var l = p.exit_down[j];
+        if (t < l && tp >= l) ex[i] = true;
+      }
+      for (var j = 0; j < p.exit_up.length; j++) {
+        var l = p.exit_up[j];
+        if (t > l && tp <= l) ex[i] = true;
+      }
+    }
+    return {entries: en, exits: ex, overlays: {}};
+  }
+
+  function signals(close, strategy, slice) {
+    if (strategy.type === 'sma_band')  return signalsSmaBand(close, strategy.params);
+    if (strategy.type === 'sma_cross') return signalsSmaCross(close, strategy.params);
+    if (strategy.type === 'thermo')    return signalsThermo(close, strategy.params, slice.thermo);
+    throw new Error('unknown strategy: ' + strategy.type);
+  }
+
+  // Execution model: **T+1 open**. Yesterday's close-based signal fires
+  // at today's open. Mirrors augury.backtest with `open_` passed in:
+  //   - signal[T] computed from close[T] (in `signals()`)
+  //   - we evaluate signal[i-1] at bar i, execute at open[i]
+  //   - LongOnly, accumulate=False, conflict_mode='ignore'
+  //   - fees on order value, slippage on price
+  //   - buy with all cash: shares = cash / (open[i]*(1+slip)*(1+fee))
+  //   - sell all shares: proceeds = shares * open[i]*(1-slip)*(1-fee)
+  //   - NAV marked-to-close: equity[i] = cash + shares * close[i]
+  function runPortfolio(close, opens, dates, entries, exits, fee, slip, cap,
+                        carryEntry, carryExit) {
+    var n = close.length;
+    var cash = cap, shares = 0;
+    var equityRaw = new Array(n);
+    var trades = [];
+    var openTrade = null;
+
+    for (var i = 0; i < n; i++) {
+      // Use yesterday's signal to decide today's open execution. At the
+      // first in-window bar there's no prior bar inside the slice, so we
+      // fall back to the carried signal from the bar just before the
+      // window — this lets a position open right at the window start when
+      // the regime is already active (mirrors Python's shift-then-slice).
+      var sigIdx = i - 1;
+      var flat = shares < 1e-12;
+      var e = sigIdx >= 0 ? entries[sigIdx] === true : carryEntry === true;
+      var x = sigIdx >= 0 ? exits[sigIdx] === true : carryExit === true;
+      // conflict_mode='ignore': both → no-op
+      var action = (e === x) ? null : (e ? 'buy' : 'sell');
+
+      if (action === 'buy' && flat) {
+        var preCash = cash;
+        var bp = opens[i] * (1 + slip);
+        shares = preCash / (bp * (1 + fee));
+        cash = 0;
+        openTrade = {entryIdx: i, entryPrice: bp,
+                     entryCash: preCash, entryShares: shares};
+      } else if (action === 'sell' && !flat) {
+        var sp = opens[i] * (1 - slip);
+        var proceeds = shares * sp * (1 - fee);
+        // MAE = lowest close within [entry, exit] vs entry price.
+        var lo2 = Infinity;
+        for (var j = openTrade.entryIdx; j <= i; j++) {
+          if (close[j] < lo2) lo2 = close[j];
+        }
+        trades.push({
+          entryIdx: openTrade.entryIdx, entryDate: dates[openTrade.entryIdx],
+          entryPrice: openTrade.entryPrice,
+          exitIdx: i, exitDate: dates[i], exitPrice: sp,
+          pnl: proceeds - openTrade.entryCash,
+          ret: proceeds / openTrade.entryCash - 1,
+          mae: lo2 / openTrade.entryPrice - 1,
+          status: 'Closed',
+        });
+        cash = proceeds; shares = 0; openTrade = null;
+      }
+      equityRaw[i] = cash + shares * close[i];
+    }
+
+    // Open trade at end: mark-to-market at last close (no exit fee).
+    if (openTrade && n > 0) {
+      var last = n - 1;
+      var lo3 = Infinity;
+      for (var k = openTrade.entryIdx; k <= last; k++) {
+        if (close[k] < lo3) lo3 = close[k];
+      }
+      var mtm = openTrade.entryShares * close[last];
+      trades.push({
+        entryIdx: openTrade.entryIdx, entryDate: dates[openTrade.entryIdx],
+        entryPrice: openTrade.entryPrice,
+        exitIdx: null, exitDate: null, exitPrice: null,
+        pnl: mtm - openTrade.entryCash,
+        ret: mtm / openTrade.entryCash - 1,
+        mae: lo3 / openTrade.entryPrice - 1,
+        status: 'Open',
+      });
+    }
+
+    // Normalize NAV so series starts at 1.0.
+    var equity = new Array(n);
+    for (var m = 0; m < n; m++) equity[m] = equityRaw[m] / cap;
+
+    // B&H: buy at open[0] (T+1 semantics → enter immediately).
+    var bhEquity = new Array(n);
+    if (n > 0) {
+      var bhP = opens[0] * (1 + slip);
+      var bhShares = cap / (bhP * (1 + fee));
+      for (var q = 0; q < n; q++) bhEquity[q] = (bhShares * close[q]) / cap;
+    }
+
+    // Drawdown — equity / running peak - 1.
+    var dd = new Array(n);
+    var peak = -Infinity;
+    for (var r = 0; r < n; r++) {
+      if (equity[r] > peak) peak = equity[r];
+      dd[r] = peak > 0 ? equity[r] / peak - 1 : 0;
+    }
+
+    return {equity: equity, bhEquity: bhEquity, drawdown: dd, trades: trades};
+  }
+
+  function dailyReturns(eq) {
+    var out = [];
+    for (var i = 1; i < eq.length; i++) {
+      if (eq[i-1] > 0) out.push(eq[i] / eq[i-1] - 1);
+    }
+    return out;
+  }
+  function mean(a) {
+    if (!a.length) return NaN;
+    var s = 0;
+    for (var i = 0; i < a.length; i++) s += a[i];
+    return s / a.length;
+  }
+  function stdSample(a) {
+    if (a.length < 2) return NaN;
+    var mu = mean(a);
+    var ss = 0;
+    for (var i = 0; i < a.length; i++) { var d = a[i] - mu; ss += d * d; }
+    return Math.sqrt(ss / (a.length - 1));
+  }
+  function cagrFromEquity(equity, dates) {
+    if (!equity.length) return NaN;
+    var n = equity.length;
+    var d0 = Date.parse(dates[0]);
+    var d1 = Date.parse(dates[n-1]);
+    var years = (d1 - d0) / 86400000 / 365.25;
+    if (years <= 0 || equity[0] <= 0) return NaN;
+    return Math.pow(equity[n-1] / equity[0], 1/years) - 1;
+  }
+
+  // Return/risk metrics for an equity curve, shared by the strategy and its
+  // buy-and-hold baseline (no trade stats — B&H is one perpetual position).
+  // Conventions: Vol annualizes with sqrt(252) (augury._annualized_vol);
+  // Sharpe/Sortino with vbt's calendar-day sqrt(365); CAGR is calendar-time
+  // geometric; Calmar uses vbt's ann_return = (1+total)^(365/n_returns)-1,
+  // which differs from CAGR when rows span less calendar time. `mdd` may be
+  // passed precomputed (the strategy already has a drawdown series); when
+  // omitted it's derived from the curve (equity / running peak - 1).
+  function returnRisk(equity, dates, mdd) {
+    var n = equity.length;
+    if (!n) return {cagr: NaN, max_drawdown: NaN, vol: NaN, sharpe: NaN,
+                    sortino: NaN, calmar: NaN, end_nav: NaN};
+    var rets = dailyReturns(equity);
+    var meanR = mean(rets);
+    var stdR = stdSample(rets);
+    var vol = stdR * Math.sqrt(252);
+    var sharpe = (stdR > 0) ? (meanR / stdR) * Math.sqrt(365) : NaN;
+    var dsSq = 0;
+    for (var i = 0; i < rets.length; i++) {
+      if (rets[i] < 0) dsSq += rets[i] * rets[i];
+    }
+    var dsStd = (rets.length > 1) ? Math.sqrt(dsSq / (rets.length - 1)) : 0;
+    var sortino = (dsStd > 0) ? (meanR / dsStd) * Math.sqrt(365) : NaN;
+    if (mdd === undefined) {
+      mdd = 0; var peak = -Infinity;
+      for (var j = 0; j < n; j++) {
+        if (equity[j] > peak) peak = equity[j];
+        if (peak > 0) { var d = equity[j] / peak - 1; if (d < mdd) mdd = d; }
+      }
+    }
+    var vbtAnnReturn = NaN;
+    if (rets.length > 0 && equity[0] > 0) {
+      var totalRet = equity[n-1] / equity[0] - 1;
+      vbtAnnReturn = Math.pow(1 + totalRet, 365 / rets.length) - 1;
+    }
+    var calmar = (mdd < 0 && isFinite(vbtAnnReturn)) ? vbtAnnReturn / Math.abs(mdd) : NaN;
+    return {cagr: cagrFromEquity(equity, dates), max_drawdown: mdd, vol: vol,
+            sharpe: sharpe, sortino: sortino, calmar: calmar, end_nav: equity[n-1]};
+  }
+
+  function computeMetrics(equity, bhEquity, drawdown, trades, dates) {
+    var n = equity.length;
+    if (!n) return {};
+    var s = returnRisk(equity, dates, Math.min.apply(null, drawdown));
+    var bh = returnRisk(bhEquity, dates);
+
+    var closed = trades.filter(function(t) { return t.status === 'Closed'; });
+    var wins = closed.filter(function(t) { return t.pnl > 0; });
+    var losses = closed.filter(function(t) { return t.pnl <= 0; });
+    var winRate = closed.length > 0 ? wins.length / closed.length : NaN;
+    var winSum = wins.reduce(function(a,t) { return a + t.pnl; }, 0);
+    var lossSum = losses.reduce(function(a,t) { return a + Math.abs(t.pnl); }, 0);
+    var pf = lossSum > 0 ? winSum / lossSum : NaN;
+    var avgWin = wins.length ? wins.reduce(function(a,t){return a+t.ret;}, 0) / wins.length : NaN;
+    var avgLoss = losses.length ? losses.reduce(function(a,t){return a+t.ret;}, 0) / losses.length : NaN;
+    var payoff = (losses.length && avgLoss !== 0) ? Math.abs(avgWin / avgLoss) : NaN;
+    var maeAll = trades.length
+                 ? trades.reduce(function(a,t){return Math.min(a, t.mae);}, 0)
+                 : 0;
+
+    return {
+      cagr: s.cagr, max_drawdown: s.max_drawdown, mae: maeAll, vol: s.vol,
+      sharpe: s.sharpe, sortino: s.sortino, calmar: s.calmar,
+      win_rate: winRate, payoff: payoff, profit_factor: pf,
+      end_nav: s.end_nav, bh_end_nav: bh.end_nav,
+      bh_cagr: bh.cagr, bh_max_drawdown: bh.max_drawdown, bh_vol: bh.vol,
+      bh_sharpe: bh.sharpe, bh_sortino: bh.sortino, bh_calmar: bh.calmar,
+      total_trades: trades.length, closed_trades: closed.length,
+      open_trades: trades.length - closed.length,
+    };
+  }
+
+  // Slice every overlay array to [lo, hi) so it aligns with the
+  // windowed date axis (overlays are computed full-length for warmup).
+  function _sliceOverlays(ov, lo, hi) {
+    var out = {};
+    Object.keys(ov || {}).forEach(function(k) {
+      out[k] = ov[k].slice(lo, hi);
+    });
+    return out;
+  }
+
+  // First index whose date is >= startDate (the window's left edge).
+  function _startIdx(dates, startDate) {
+    var i = 0;
+    if (startDate) while (i < dates.length && dates[i] < startDate) i++;
+    return i;
+  }
+
+  // Inclusive slice on [startDate, endDate] over the ISO-date axis.
+  function slicePayload(payload, startDate, endDate) {
+    var dates = payload.dates;
+    var i0 = 0, i1 = dates.length - 1;
+    if (startDate) {
+      while (i0 <= i1 && dates[i0] < startDate) i0++;
+    }
+    if (endDate) {
+      while (i1 >= i0 && dates[i1] > endDate) i1--;
+    }
+    if (i1 < i0) return {dates: [], close: [], opens: [], thermo: []};
+    var out = {
+      dates: dates.slice(i0, i1 + 1),
+      close: payload.close.slice(i0, i1 + 1),
+      opens: payload.open.slice(i0, i1 + 1),
+    };
+    if (payload.thermo) out.thermo = payload.thermo.slice(i0, i1 + 1);
+    return out;
+  }
+
+  // Pending action — signal at the last bar that wasn't executed yet.
+  // Mirrors augury.backtest._pending_action: same conflict_mode='ignore'
+  // semantics, gated by current position.
+  function pendingAction(entries, exits, currentState) {
+    if (!entries.length) return 'hold';
+    var last = entries.length - 1;
+    var e = entries[last] === true;
+    var x = exits[last] === true;
+    if (e === x) return 'hold';
+    if (e && currentState === 'flat') return 'buy';
+    if (x && currentState === 'long') return 'sell';
+    return 'hold';
+  }
+
+  function run(payload, startDate, endDate) {
+    // Signals on the FULL series so rolling indicators (SMA, crosses)
+    // warm up on pre-window history, THEN restrict to [startDate,
+    // endDate]. Slicing before computing them would cold-start the SMA
+    // (NaN for the first n bars of the window) and silently delay the
+    // first trade — mirrors augury.backtest.run.
+    var sigFull = signals(payload.close, payload.strategy,
+                          {thermo: payload.thermo});
+    var dates = payload.dates;
+    var i0 = _startIdx(dates, startDate);
+    var i1 = dates.length - 1;
+    if (endDate) while (i1 >= i0 && dates[i1] > endDate) i1--;
+
+    var slDates = [], slClose = [], slOpens = [], slThermo;
+    var entries = [], exits = [], overlays = {};
+    var carryEntry = false, carryExit = false;
+    if (i1 >= i0) {
+      slDates = dates.slice(i0, i1 + 1);
+      slClose = payload.close.slice(i0, i1 + 1);
+      slOpens = payload.open.slice(i0, i1 + 1);
+      entries = sigFull.entries.slice(i0, i1 + 1);
+      exits   = sigFull.exits.slice(i0, i1 + 1);
+      overlays = _sliceOverlays(sigFull.overlays, i0, i1 + 1);
+      carryEntry = i0 > 0 ? sigFull.entries[i0 - 1] === true : false;
+      carryExit  = i0 > 0 ? sigFull.exits[i0 - 1] === true : false;
+      if (payload.thermo) slThermo = payload.thermo.slice(i0, i1 + 1);
+    }
+
+    var pf = runPortfolio(slClose, slOpens, slDates, entries, exits,
+                          payload.fee, payload.slippage,
+                          payload.init_capital, carryEntry, carryExit);
+    var metrics = computeMetrics(pf.equity, pf.bhEquity, pf.drawdown,
+                                  pf.trades, slDates);
+    // B&H entry = the open at the window's first bar (where the hold starts).
+    metrics.bh_entry = slOpens.length ? slOpens[0] : null;
+    var openTrade = pf.trades.length && pf.trades[pf.trades.length-1].status === 'Open'
+                    ? pf.trades[pf.trades.length-1] : null;
+    var state = openTrade ? 'long' : 'flat';
+    var pending = pendingAction(entries, exits, state);
+    return {
+      dates: slDates, close: slClose, opens: slOpens,
+      entries: entries, exits: exits, overlays: overlays,
+      equity: pf.equity, bhEquity: pf.bhEquity, drawdown: pf.drawdown,
+      trades: pf.trades, metrics: metrics,
+      state: state, pending: pending,
+      thermo: slThermo,
+    };
+  }
+
+  // =================================================================
+  // Hybrid engine — primary asset + substitute basket, same semantics
+  // as augury.backtest.run_hybrid. Always 100% invested: holds primary
+  // when base strategy is long, rotates into the basket when flat.
+  // No daily rebalance during the basket holding period.
+  // =================================================================
+  function sliceHybridPayload(payload, startDate, endDate) {
+    var dates = payload.dates;
+    var i0 = 0, i1 = dates.length - 1;
+    if (startDate) while (i0 <= i1 && dates[i0] < startDate) i0++;
+    if (endDate) while (i1 >= i0 && dates[i1] > endDate) i1--;
+    if (i1 < i0) {
+      return {dates: [], close: [], opens: [], subs: []};
+    }
+    return {
+      dates: dates.slice(i0, i1 + 1),
+      close: payload.close.slice(i0, i1 + 1),
+      opens: payload.open.slice(i0, i1 + 1),
+      subs: payload.substitutes.map(function(s) {
+        return {
+          ticker: s.ticker, weight: s.weight,
+          close: s.close.slice(i0, i1 + 1),
+          opens: s.open.slice(i0, i1 + 1),
+        };
+      }),
+    };
+  }
+
+  function runHybridPortfolio(sl, entries, exits, fee, slip, cap) {
+    var n = sl.close.length;
+    var subs = sl.subs;
+    var subShares = subs.map(function() { return 0; });
+    var inPrimary = false;
+    var primaryShares = 0, primaryEntryIdx = -1;
+    var primaryEntryPrice = 0, primaryEntryCapital = 0;
+    var equity = new Array(n);
+    var trades = [];
+
+    // Initialize: buy substitute basket at open[0].
+    if (n > 0) {
+      for (var k = 0; k < subs.length; k++) {
+        var leg = cap * subs[k].weight;
+        var px = subs[k].opens[0] * (1 + slip);
+        if (px && !isNaN(px) && px > 0) {
+          subShares[k] = leg / (px * (1 + fee));
+        }
+      }
+    }
+
+    for (var i = 0; i < n; i++) {
+      if (i > 0) {
+        var sigIdx = i - 1;
+        var e = entries[sigIdx] === true;
+        var x = exits[sigIdx] === true;
+        var action = (e === x) ? null : (e ? 'buy' : 'sell');
+
+        if (action === 'buy' && !inPrimary) {
+          // Sub -> primary
+          var proceeds = 0;
+          for (var k2 = 0; k2 < subs.length; k2++) {
+            var spx = subs[k2].opens[i];
+            if (spx == null || isNaN(spx)) spx = subs[k2].close[i - 1];
+            spx = spx * (1 - slip);
+            proceeds += subShares[k2] * spx * (1 - fee);
+            subShares[k2] = 0;
+          }
+          var bp = sl.opens[i] * (1 + slip);
+          if (bp && !isNaN(bp) && bp > 0) {
+            primaryShares = proceeds / (bp * (1 + fee));
+            primaryEntryIdx = i;
+            primaryEntryPrice = bp;
+            primaryEntryCapital = proceeds;
+            inPrimary = true;
+          }
+        } else if (action === 'sell' && inPrimary) {
+          // Primary -> sub
+          var sp = sl.opens[i] * (1 - slip);
+          var proceedsOut = primaryShares * sp * (1 - fee);
+          var lo = Infinity;
+          for (var j = primaryEntryIdx; j <= i; j++) {
+            if (sl.close[j] < lo) lo = sl.close[j];
+          }
+          trades.push({
+            entryIdx: primaryEntryIdx, entryDate: sl.dates[primaryEntryIdx],
+            entryPrice: primaryEntryPrice,
+            exitIdx: i, exitDate: sl.dates[i], exitPrice: sp,
+            pnl: proceedsOut - primaryEntryCapital,
+            ret: primaryEntryCapital > 0 ?
+                 proceedsOut / primaryEntryCapital - 1 : 0,
+            mae: lo / primaryEntryPrice - 1,
+            status: 'Closed',
+          });
+          primaryShares = 0;
+          inPrimary = false;
+          for (var k3 = 0; k3 < subs.length; k3++) {
+            var bpx = subs[k3].opens[i] * (1 + slip);
+            if (bpx && !isNaN(bpx) && bpx > 0) {
+              subShares[k3] = (proceedsOut * subs[k3].weight) / (bpx * (1 + fee));
+            }
+          }
+        }
+      }
+
+      // NAV at close[i]
+      var nav;
+      if (inPrimary) {
+        nav = primaryShares * sl.close[i];
+      } else {
+        nav = 0;
+        for (var k4 = 0; k4 < subs.length; k4++) {
+          nav += subShares[k4] * subs[k4].close[i];
+        }
+      }
+      equity[i] = nav;
+    }
+
+    // Open trade at end
+    if (inPrimary && n > 0) {
+      var last = n - 1;
+      var mtm = primaryShares * sl.close[last];
+      var loEnd = Infinity;
+      for (var kE = primaryEntryIdx; kE <= last; kE++) {
+        if (sl.close[kE] < loEnd) loEnd = sl.close[kE];
+      }
+      trades.push({
+        entryIdx: primaryEntryIdx, entryDate: sl.dates[primaryEntryIdx],
+        entryPrice: primaryEntryPrice,
+        exitIdx: null, exitDate: null, exitPrice: null,
+        pnl: mtm - primaryEntryCapital,
+        ret: primaryEntryCapital > 0 ? mtm / primaryEntryCapital - 1 : 0,
+        mae: loEnd / primaryEntryPrice - 1,
+        status: 'Open',
+      });
+    }
+
+    // Normalize NAV
+    var normEquity = new Array(n);
+    for (var m = 0; m < n; m++) normEquity[m] = equity[m] / cap;
+    // B&H: TSLA buy-and-hold at open[0]
+    var bhEquity = new Array(n);
+    if (n > 0) {
+      var bhP = sl.opens[0] * (1 + slip);
+      var bhShares = cap / (bhP * (1 + fee));
+      for (var q = 0; q < n; q++) {
+        bhEquity[q] = (bhShares * sl.close[q]) / cap;
+      }
+    }
+    // Drawdown
+    var dd = new Array(n);
+    var peak = -Infinity;
+    for (var r = 0; r < n; r++) {
+      if (normEquity[r] > peak) peak = normEquity[r];
+      dd[r] = peak > 0 ? normEquity[r] / peak - 1 : 0;
+    }
+    return {
+      equity: normEquity, bhEquity: bhEquity, drawdown: dd,
+      trades: trades, inPrimary: inPrimary,
+    };
+  }
+
+  function runHybrid(payload, startDate, endDate) {
+    var sl = sliceHybridPayload(payload, startDate, endDate);
+    var n = sl.close.length;
+    if (!n) {
+      return {
+        dates: [], close: [], opens: [],
+        entries: [], exits: [], overlays: {},
+        equity: [], bhEquity: [], drawdown: [], trades: [],
+        metrics: {}, state: 'flat', pending: 'hold',
+      };
+    }
+    // Signals on the FULL series (warmup), then align to the slice —
+    // same rationale as `run()`. The basket loop starts flat at i=0
+    // regardless, so no carry-in is needed here.
+    var sigFull = signals(payload.close, payload.strategy,
+                          {thermo: payload.thermo});
+    var i0 = _startIdx(payload.dates, startDate);
+    var entries = sigFull.entries.slice(i0, i0 + n);
+    var exits   = sigFull.exits.slice(i0, i0 + n);
+    var overlays = _sliceOverlays(sigFull.overlays, i0, i0 + n);
+    var pf = runHybridPortfolio(sl, entries, exits,
+                                 payload.fee, payload.slippage,
+                                 payload.init_capital);
+    var metrics = computeMetrics(pf.equity, pf.bhEquity, pf.drawdown,
+                                  pf.trades, sl.dates);
+    metrics.bh_entry = sl.opens.length ? sl.opens[0] : null;
+    var state = pf.inPrimary ? 'long' : 'flat';
+    var pending = pendingAction(entries, exits, state);
+    return {
+      dates: sl.dates, close: sl.close, opens: sl.opens,
+      entries: entries, exits: exits, overlays: overlays,
+      equity: pf.equity, bhEquity: pf.bhEquity, drawdown: pf.drawdown,
+      trades: pf.trades, metrics: metrics,
+      state: state, pending: pending,
+    };
+  }
+
+  return {run: run, runHybrid: runHybrid, signals: signals, sma: sma};
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = Backtest;
+if (typeof window !== 'undefined') window.Backtest = Backtest;
+</script>
   <script>
     // Auto-rescale Y axes to data visible within the current X range.
     // Plotly's autorange uses the full series; this hook recomputes on
@@ -1889,9 +2473,10 @@
 
     // ----------------------------------------------------------------
     // Date range picker — IS the backtest start date. Changing it re-runs
-    // the entire backtest client-side from the picked start (strict mode:
-    // SMA preheats from post-start data only, matching Python's behavior
-    // when `start` is set).
+    // the entire backtest client-side from the picked start. Signals are
+    // computed on the full series first and only then restricted to the
+    // window, so rolling indicators warm up on pre-window history (matches
+    // augury.backtest.run) instead of cold-starting at the picked date.
     //
     // The JS engine below is a hand-rolled port of vectorbt's `from_signals`
     // default semantics, audited on page load by `_verifyParity` against
@@ -2005,7 +2590,9 @@
       var py = payload.python_metrics || {};
       var keys = ['cagr','max_drawdown','mae','vol','sharpe','sortino',
                   'calmar','win_rate','payoff','profit_factor',
-                  'end_nav','bh_end_nav','total_trades','closed_trades'];
+                  'end_nav','bh_end_nav','total_trades','closed_trades',
+                  'bh_cagr','bh_max_drawdown','bh_vol','bh_sharpe',
+                  'bh_sortino','bh_calmar'];
       var bad = [];
       keys.forEach(function(k) {
         var pv = py[k], jv = jsMetrics[k];
@@ -2096,6 +2683,20 @@
         var k = el.dataset.metric;
         if (k in disp) el.textContent = disp[k];
       });
+      var bh = _formatBhForDisplay(m);
+      card.querySelectorAll('[data-metric-bh]').forEach(function(el) {
+        var k = el.dataset.metricBh;
+        if (k in bh) el.textContent = bh[k];
+      });
+      var entry = card.querySelector('[data-bh-entry]');
+      if (entry) {
+        entry.textContent = (m.bh_entry != null && isFinite(m.bh_entry))
+                            ? '@ ' + _fmtPrice(m.bh_entry) : '';
+      }
+    }
+
+    function _fmtPrice(v) {
+      return v.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     function _fmtPctSigned(v, digits) {
@@ -2130,8 +2731,19 @@
         'Payoff':  _fmtNum(m.payoff, 1),
         'PF':      _fmtNum(m.profit_factor, 1),
         'EndNAV':  _fmtNav(m.end_nav),
-        'B&H':     _fmtNav(m.bh_end_nav),
         'Trades':  String(m.total_trades || 0),
+      };
+    }
+    // Buy-and-hold baseline row — only the metrics meaningful for a hold.
+    function _formatBhForDisplay(m) {
+      return {
+        'CAGR':    _fmtPctSigned(m.bh_cagr, 1),
+        'MDD':     _fmtPct(m.bh_max_drawdown, 1),
+        'Vol':     _fmtPct(m.bh_vol, 1),
+        'Sharpe':  _fmtNum(m.bh_sharpe, 2),
+        'Sortino': _fmtNum(m.bh_sortino, 2),
+        'Calmar':  _fmtNum(m.bh_calmar, 2),
+        'EndNAV':  _fmtNav(m.bh_end_nav),
       };
     }
 
@@ -2486,524 +3098,6 @@
       return base;
     }
 
-    // =================================================================
-    // Backtest engine — vectorbt's `from_signals` default semantics in JS.
-    // =================================================================
-    var Backtest = (function() {
-      // pandas .rolling(n).mean() — NaN for the first n-1 elements.
-      function sma(arr, n) {
-        var out = new Array(arr.length);
-        var sum = 0;
-        for (var i = 0; i < arr.length; i++) {
-          sum += arr[i];
-          if (i >= n) sum -= arr[i - n];
-          out[i] = (i >= n - 1) ? sum / n : NaN;
-        }
-        return out;
-      }
-
-      function signalsSmaBand(close, p) {
-        var ma = sma(close, p.ma);
-        var en = new Array(close.length);
-        var ex = new Array(close.length);
-        var up = new Array(close.length);
-        var lo = new Array(close.length);
-        for (var i = 0; i < close.length; i++) {
-          if (isNaN(ma[i])) {
-            en[i] = false; ex[i] = false;
-            up[i] = NaN; lo[i] = NaN;
-            continue;
-          }
-          up[i] = ma[i] * (1 + p.threshold);
-          lo[i] = ma[i] * (1 - p.threshold);
-          en[i] = close[i] > up[i];
-          ex[i] = close[i] < lo[i];
-        }
-        return {entries: en, exits: ex, overlays: {ma: ma, upper: up, lower: lo}};
-      }
-
-      function signalsSmaCross(close, p) {
-        var f = sma(close, p.fast);
-        var s = sma(close, p.slow);
-        var en = new Array(close.length);
-        var ex = new Array(close.length);
-        for (var i = 0; i < close.length; i++) {
-          if (isNaN(f[i]) || isNaN(s[i])) { en[i] = false; ex[i] = false; continue; }
-          en[i] = f[i] > s[i];
-          ex[i] = f[i] < s[i];
-        }
-        return {entries: en, exits: ex, overlays: {ma_fast: f, ma_slow: s}};
-      }
-
-      // ThermoBand: the thermometer is too expensive to recompute in JS
-      // (8 oscillators + composite). The server hands us a pre-computed
-      // thermo array aligned to `close`; we apply level-crossing logic.
-      // `null` entries in `thermo` mark warmup bars where no signal fires.
-      function signalsThermo(close, p, thermo) {
-        var n = close.length;
-        var en = new Array(n), ex = new Array(n);
-        en[0] = false; ex[0] = false;
-        for (var i = 1; i < n; i++) {
-          en[i] = false; ex[i] = false;
-          var t = thermo[i], tp = thermo[i - 1];
-          if (t == null || tp == null) continue;
-          for (var j = 0; j < p.enter_up.length; j++) {
-            var l = p.enter_up[j];
-            if (t > l && tp <= l) en[i] = true;
-          }
-          for (var j = 0; j < p.exit_down.length; j++) {
-            var l = p.exit_down[j];
-            if (t < l && tp >= l) ex[i] = true;
-          }
-          for (var j = 0; j < p.exit_up.length; j++) {
-            var l = p.exit_up[j];
-            if (t > l && tp <= l) ex[i] = true;
-          }
-        }
-        return {entries: en, exits: ex, overlays: {}};
-      }
-
-      function signals(close, strategy, slice) {
-        if (strategy.type === 'sma_band')  return signalsSmaBand(close, strategy.params);
-        if (strategy.type === 'sma_cross') return signalsSmaCross(close, strategy.params);
-        if (strategy.type === 'thermo')    return signalsThermo(close, strategy.params, slice.thermo);
-        throw new Error('unknown strategy: ' + strategy.type);
-      }
-
-      // Execution model: **T+1 open**. Yesterday's close-based signal fires
-      // at today's open. Mirrors augury.backtest with `open_` passed in:
-      //   - signal[T] computed from close[T] (in `signals()`)
-      //   - we evaluate signal[i-1] at bar i, execute at open[i]
-      //   - LongOnly, accumulate=False, conflict_mode='ignore'
-      //   - fees on order value, slippage on price
-      //   - buy with all cash: shares = cash / (open[i]*(1+slip)*(1+fee))
-      //   - sell all shares: proceeds = shares * open[i]*(1-slip)*(1-fee)
-      //   - NAV marked-to-close: equity[i] = cash + shares * close[i]
-      function runPortfolio(close, opens, dates, entries, exits, fee, slip, cap) {
-        var n = close.length;
-        var cash = cap, shares = 0;
-        var equityRaw = new Array(n);
-        var trades = [];
-        var openTrade = null;
-
-        for (var i = 0; i < n; i++) {
-          // Use yesterday's signal to decide today's open execution.
-          var sigIdx = i - 1;
-          var flat = shares < 1e-12;
-          var e = sigIdx >= 0 && entries[sigIdx] === true;
-          var x = sigIdx >= 0 && exits[sigIdx] === true;
-          // conflict_mode='ignore': both → no-op
-          var action = (e === x) ? null : (e ? 'buy' : 'sell');
-
-          if (action === 'buy' && flat) {
-            var preCash = cash;
-            var bp = opens[i] * (1 + slip);
-            shares = preCash / (bp * (1 + fee));
-            cash = 0;
-            openTrade = {entryIdx: i, entryPrice: bp,
-                         entryCash: preCash, entryShares: shares};
-          } else if (action === 'sell' && !flat) {
-            var sp = opens[i] * (1 - slip);
-            var proceeds = shares * sp * (1 - fee);
-            // MAE = lowest close within [entry, exit] vs entry price.
-            var lo2 = Infinity;
-            for (var j = openTrade.entryIdx; j <= i; j++) {
-              if (close[j] < lo2) lo2 = close[j];
-            }
-            trades.push({
-              entryIdx: openTrade.entryIdx, entryDate: dates[openTrade.entryIdx],
-              entryPrice: openTrade.entryPrice,
-              exitIdx: i, exitDate: dates[i], exitPrice: sp,
-              pnl: proceeds - openTrade.entryCash,
-              ret: proceeds / openTrade.entryCash - 1,
-              mae: lo2 / openTrade.entryPrice - 1,
-              status: 'Closed',
-            });
-            cash = proceeds; shares = 0; openTrade = null;
-          }
-          equityRaw[i] = cash + shares * close[i];
-        }
-
-        // Open trade at end: mark-to-market at last close (no exit fee).
-        if (openTrade && n > 0) {
-          var last = n - 1;
-          var lo3 = Infinity;
-          for (var k = openTrade.entryIdx; k <= last; k++) {
-            if (close[k] < lo3) lo3 = close[k];
-          }
-          var mtm = openTrade.entryShares * close[last];
-          trades.push({
-            entryIdx: openTrade.entryIdx, entryDate: dates[openTrade.entryIdx],
-            entryPrice: openTrade.entryPrice,
-            exitIdx: null, exitDate: null, exitPrice: null,
-            pnl: mtm - openTrade.entryCash,
-            ret: mtm / openTrade.entryCash - 1,
-            mae: lo3 / openTrade.entryPrice - 1,
-            status: 'Open',
-          });
-        }
-
-        // Normalize NAV so series starts at 1.0.
-        var equity = new Array(n);
-        for (var m = 0; m < n; m++) equity[m] = equityRaw[m] / cap;
-
-        // B&H: buy at open[0] (T+1 semantics → enter immediately).
-        var bhEquity = new Array(n);
-        if (n > 0) {
-          var bhP = opens[0] * (1 + slip);
-          var bhShares = cap / (bhP * (1 + fee));
-          for (var q = 0; q < n; q++) bhEquity[q] = (bhShares * close[q]) / cap;
-        }
-
-        // Drawdown — equity / running peak - 1.
-        var dd = new Array(n);
-        var peak = -Infinity;
-        for (var r = 0; r < n; r++) {
-          if (equity[r] > peak) peak = equity[r];
-          dd[r] = peak > 0 ? equity[r] / peak - 1 : 0;
-        }
-
-        return {equity: equity, bhEquity: bhEquity, drawdown: dd, trades: trades};
-      }
-
-      function dailyReturns(eq) {
-        var out = [];
-        for (var i = 1; i < eq.length; i++) {
-          if (eq[i-1] > 0) out.push(eq[i] / eq[i-1] - 1);
-        }
-        return out;
-      }
-      function mean(a) {
-        if (!a.length) return NaN;
-        var s = 0;
-        for (var i = 0; i < a.length; i++) s += a[i];
-        return s / a.length;
-      }
-      function stdSample(a) {
-        if (a.length < 2) return NaN;
-        var mu = mean(a);
-        var ss = 0;
-        for (var i = 0; i < a.length; i++) { var d = a[i] - mu; ss += d * d; }
-        return Math.sqrt(ss / (a.length - 1));
-      }
-      function cagrFromEquity(equity, dates) {
-        if (!equity.length) return NaN;
-        var n = equity.length;
-        var d0 = Date.parse(dates[0]);
-        var d1 = Date.parse(dates[n-1]);
-        var years = (d1 - d0) / 86400000 / 365.25;
-        if (years <= 0 || equity[0] <= 0) return NaN;
-        return Math.pow(equity[n-1] / equity[0], 1/years) - 1;
-      }
-
-      function computeMetrics(equity, bhEquity, drawdown, trades, dates) {
-        var n = equity.length;
-        if (!n) return {};
-        var rets = dailyReturns(equity);
-        var meanR = mean(rets);
-        var stdR = stdSample(rets);
-        // Vol uses trading-day annualization (sqrt(252)) — matches augury's
-        // augury.backtest._annualized_vol, which is what users have been
-        // looking at. Sharpe/Sortino use vbt's calendar-day convention
-        // (sqrt(365)), since pf.stats() is the source of truth for those.
-        var vol = stdR * Math.sqrt(252);
-        var sharpe = (stdR > 0) ? (meanR / stdR) * Math.sqrt(365) : NaN;
-
-        // Sortino — vbt squares only the negative returns but divides by the
-        // FULL sample count (n-1). Positives contribute 0, not their square.
-        var dsSq = 0;
-        for (var i = 0; i < rets.length; i++) {
-          if (rets[i] < 0) dsSq += rets[i] * rets[i];
-        }
-        var dsStd = (rets.length > 1) ? Math.sqrt(dsSq / (rets.length - 1)) : 0;
-        var sortino = (dsStd > 0) ? (meanR / dsStd) * Math.sqrt(365) : NaN;
-
-        // CAGR (calendar-time geometric annualization, used for the
-        // displayed CAGR metric). Calmar separately uses vbt's
-        // "ann_return = (1+total)^(365/n_returns)-1" which differs from
-        // CAGR when the return series spans less calendar time per row
-        // (e.g., NVDA has 6631 trading-day returns over 26 calendar years,
-        // so vbt's ann_return ~ 50% vs CAGR 32%).
-        var cg = cagrFromEquity(equity, dates);
-        var mdd = Math.min.apply(null, drawdown);
-        var vbtAnnReturn = NaN;
-        if (rets.length > 0 && equity[0] > 0) {
-          var totalRet = equity[n-1] / equity[0] - 1;
-          vbtAnnReturn = Math.pow(1 + totalRet, 365 / rets.length) - 1;
-        }
-        var calmar = (mdd < 0 && isFinite(vbtAnnReturn)) ? vbtAnnReturn / Math.abs(mdd) : NaN;
-
-        var closed = trades.filter(function(t) { return t.status === 'Closed'; });
-        var wins = closed.filter(function(t) { return t.pnl > 0; });
-        var losses = closed.filter(function(t) { return t.pnl <= 0; });
-        var winRate = closed.length > 0 ? wins.length / closed.length : NaN;
-        var winSum = wins.reduce(function(a,t) { return a + t.pnl; }, 0);
-        var lossSum = losses.reduce(function(a,t) { return a + Math.abs(t.pnl); }, 0);
-        var pf = lossSum > 0 ? winSum / lossSum : NaN;
-        var avgWin = wins.length ? wins.reduce(function(a,t){return a+t.ret;}, 0) / wins.length : NaN;
-        var avgLoss = losses.length ? losses.reduce(function(a,t){return a+t.ret;}, 0) / losses.length : NaN;
-        var payoff = (losses.length && avgLoss !== 0) ? Math.abs(avgWin / avgLoss) : NaN;
-        var maeAll = trades.length
-                     ? trades.reduce(function(a,t){return Math.min(a, t.mae);}, 0)
-                     : 0;
-
-        return {
-          cagr: cg, max_drawdown: mdd, mae: maeAll, vol: vol,
-          sharpe: sharpe, sortino: sortino, calmar: calmar,
-          win_rate: winRate, payoff: payoff, profit_factor: pf,
-          end_nav: equity[n-1], bh_end_nav: bhEquity[n-1],
-          total_trades: trades.length, closed_trades: closed.length,
-          open_trades: trades.length - closed.length,
-        };
-      }
-
-      // Inclusive slice on [startDate, endDate] over the ISO-date axis.
-      function slicePayload(payload, startDate, endDate) {
-        var dates = payload.dates;
-        var i0 = 0, i1 = dates.length - 1;
-        if (startDate) {
-          while (i0 <= i1 && dates[i0] < startDate) i0++;
-        }
-        if (endDate) {
-          while (i1 >= i0 && dates[i1] > endDate) i1--;
-        }
-        if (i1 < i0) return {dates: [], close: [], opens: [], thermo: []};
-        var out = {
-          dates: dates.slice(i0, i1 + 1),
-          close: payload.close.slice(i0, i1 + 1),
-          opens: payload.open.slice(i0, i1 + 1),
-        };
-        if (payload.thermo) out.thermo = payload.thermo.slice(i0, i1 + 1);
-        return out;
-      }
-
-      // Pending action — signal at the last bar that wasn't executed yet.
-      // Mirrors augury.backtest._pending_action: same conflict_mode='ignore'
-      // semantics, gated by current position.
-      function pendingAction(entries, exits, currentState) {
-        if (!entries.length) return 'hold';
-        var last = entries.length - 1;
-        var e = entries[last] === true;
-        var x = exits[last] === true;
-        if (e === x) return 'hold';
-        if (e && currentState === 'flat') return 'buy';
-        if (x && currentState === 'long') return 'sell';
-        return 'hold';
-      }
-
-      function run(payload, startDate, endDate) {
-        var sl = slicePayload(payload, startDate, endDate);
-        var sig = signals(sl.close, payload.strategy, sl);
-        var pf = runPortfolio(sl.close, sl.opens, sl.dates,
-                              sig.entries, sig.exits,
-                              payload.fee, payload.slippage,
-                              payload.init_capital);
-        var metrics = computeMetrics(pf.equity, pf.bhEquity, pf.drawdown,
-                                      pf.trades, sl.dates);
-        var openTrade = pf.trades.length && pf.trades[pf.trades.length-1].status === 'Open'
-                        ? pf.trades[pf.trades.length-1] : null;
-        var state = openTrade ? 'long' : 'flat';
-        var pending = pendingAction(sig.entries, sig.exits, state);
-        return {
-          dates: sl.dates, close: sl.close, opens: sl.opens,
-          entries: sig.entries, exits: sig.exits, overlays: sig.overlays,
-          equity: pf.equity, bhEquity: pf.bhEquity, drawdown: pf.drawdown,
-          trades: pf.trades, metrics: metrics,
-          state: state, pending: pending,
-          thermo: sl.thermo,
-        };
-      }
-
-      // =================================================================
-      // Hybrid engine — primary asset + substitute basket, same semantics
-      // as augury.backtest.run_hybrid. Always 100% invested: holds primary
-      // when base strategy is long, rotates into the basket when flat.
-      // No daily rebalance during the basket holding period.
-      // =================================================================
-      function sliceHybridPayload(payload, startDate, endDate) {
-        var dates = payload.dates;
-        var i0 = 0, i1 = dates.length - 1;
-        if (startDate) while (i0 <= i1 && dates[i0] < startDate) i0++;
-        if (endDate) while (i1 >= i0 && dates[i1] > endDate) i1--;
-        if (i1 < i0) {
-          return {dates: [], close: [], opens: [], subs: []};
-        }
-        return {
-          dates: dates.slice(i0, i1 + 1),
-          close: payload.close.slice(i0, i1 + 1),
-          opens: payload.open.slice(i0, i1 + 1),
-          subs: payload.substitutes.map(function(s) {
-            return {
-              ticker: s.ticker, weight: s.weight,
-              close: s.close.slice(i0, i1 + 1),
-              opens: s.open.slice(i0, i1 + 1),
-            };
-          }),
-        };
-      }
-
-      function runHybridPortfolio(sl, entries, exits, fee, slip, cap) {
-        var n = sl.close.length;
-        var subs = sl.subs;
-        var subShares = subs.map(function() { return 0; });
-        var inPrimary = false;
-        var primaryShares = 0, primaryEntryIdx = -1;
-        var primaryEntryPrice = 0, primaryEntryCapital = 0;
-        var equity = new Array(n);
-        var trades = [];
-
-        // Initialize: buy substitute basket at open[0].
-        if (n > 0) {
-          for (var k = 0; k < subs.length; k++) {
-            var leg = cap * subs[k].weight;
-            var px = subs[k].opens[0] * (1 + slip);
-            if (px && !isNaN(px) && px > 0) {
-              subShares[k] = leg / (px * (1 + fee));
-            }
-          }
-        }
-
-        for (var i = 0; i < n; i++) {
-          if (i > 0) {
-            var sigIdx = i - 1;
-            var e = entries[sigIdx] === true;
-            var x = exits[sigIdx] === true;
-            var action = (e === x) ? null : (e ? 'buy' : 'sell');
-
-            if (action === 'buy' && !inPrimary) {
-              // Sub -> primary
-              var proceeds = 0;
-              for (var k2 = 0; k2 < subs.length; k2++) {
-                var spx = subs[k2].opens[i];
-                if (spx == null || isNaN(spx)) spx = subs[k2].close[i - 1];
-                spx = spx * (1 - slip);
-                proceeds += subShares[k2] * spx * (1 - fee);
-                subShares[k2] = 0;
-              }
-              var bp = sl.opens[i] * (1 + slip);
-              if (bp && !isNaN(bp) && bp > 0) {
-                primaryShares = proceeds / (bp * (1 + fee));
-                primaryEntryIdx = i;
-                primaryEntryPrice = bp;
-                primaryEntryCapital = proceeds;
-                inPrimary = true;
-              }
-            } else if (action === 'sell' && inPrimary) {
-              // Primary -> sub
-              var sp = sl.opens[i] * (1 - slip);
-              var proceedsOut = primaryShares * sp * (1 - fee);
-              var lo = Infinity;
-              for (var j = primaryEntryIdx; j <= i; j++) {
-                if (sl.close[j] < lo) lo = sl.close[j];
-              }
-              trades.push({
-                entryIdx: primaryEntryIdx, entryDate: sl.dates[primaryEntryIdx],
-                entryPrice: primaryEntryPrice,
-                exitIdx: i, exitDate: sl.dates[i], exitPrice: sp,
-                pnl: proceedsOut - primaryEntryCapital,
-                ret: primaryEntryCapital > 0 ?
-                     proceedsOut / primaryEntryCapital - 1 : 0,
-                mae: lo / primaryEntryPrice - 1,
-                status: 'Closed',
-              });
-              primaryShares = 0;
-              inPrimary = false;
-              for (var k3 = 0; k3 < subs.length; k3++) {
-                var bpx = subs[k3].opens[i] * (1 + slip);
-                if (bpx && !isNaN(bpx) && bpx > 0) {
-                  subShares[k3] = (proceedsOut * subs[k3].weight) / (bpx * (1 + fee));
-                }
-              }
-            }
-          }
-
-          // NAV at close[i]
-          var nav;
-          if (inPrimary) {
-            nav = primaryShares * sl.close[i];
-          } else {
-            nav = 0;
-            for (var k4 = 0; k4 < subs.length; k4++) {
-              nav += subShares[k4] * subs[k4].close[i];
-            }
-          }
-          equity[i] = nav;
-        }
-
-        // Open trade at end
-        if (inPrimary && n > 0) {
-          var last = n - 1;
-          var mtm = primaryShares * sl.close[last];
-          var loEnd = Infinity;
-          for (var kE = primaryEntryIdx; kE <= last; kE++) {
-            if (sl.close[kE] < loEnd) loEnd = sl.close[kE];
-          }
-          trades.push({
-            entryIdx: primaryEntryIdx, entryDate: sl.dates[primaryEntryIdx],
-            entryPrice: primaryEntryPrice,
-            exitIdx: null, exitDate: null, exitPrice: null,
-            pnl: mtm - primaryEntryCapital,
-            ret: primaryEntryCapital > 0 ? mtm / primaryEntryCapital - 1 : 0,
-            mae: loEnd / primaryEntryPrice - 1,
-            status: 'Open',
-          });
-        }
-
-        // Normalize NAV
-        var normEquity = new Array(n);
-        for (var m = 0; m < n; m++) normEquity[m] = equity[m] / cap;
-        // B&H: TSLA buy-and-hold at open[0]
-        var bhEquity = new Array(n);
-        if (n > 0) {
-          var bhP = sl.opens[0] * (1 + slip);
-          var bhShares = cap / (bhP * (1 + fee));
-          for (var q = 0; q < n; q++) {
-            bhEquity[q] = (bhShares * sl.close[q]) / cap;
-          }
-        }
-        // Drawdown
-        var dd = new Array(n);
-        var peak = -Infinity;
-        for (var r = 0; r < n; r++) {
-          if (normEquity[r] > peak) peak = normEquity[r];
-          dd[r] = peak > 0 ? normEquity[r] / peak - 1 : 0;
-        }
-        return {
-          equity: normEquity, bhEquity: bhEquity, drawdown: dd,
-          trades: trades, inPrimary: inPrimary,
-        };
-      }
-
-      function runHybrid(payload, startDate, endDate) {
-        var sl = sliceHybridPayload(payload, startDate, endDate);
-        var n = sl.close.length;
-        if (!n) {
-          return {
-            dates: [], close: [], opens: [],
-            entries: [], exits: [], overlays: {},
-            equity: [], bhEquity: [], drawdown: [], trades: [],
-            metrics: {}, state: 'flat', pending: 'hold',
-          };
-        }
-        var sig = signals(sl.close, payload.strategy, sl);
-        var pf = runHybridPortfolio(sl, sig.entries, sig.exits,
-                                     payload.fee, payload.slippage,
-                                     payload.init_capital);
-        var metrics = computeMetrics(pf.equity, pf.bhEquity, pf.drawdown,
-                                      pf.trades, sl.dates);
-        var state = pf.inPrimary ? 'long' : 'flat';
-        var pending = pendingAction(sig.entries, sig.exits, state);
-        return {
-          dates: sl.dates, close: sl.close, opens: sl.opens,
-          entries: sig.entries, exits: sig.exits, overlays: sig.overlays,
-          equity: pf.equity, bhEquity: pf.bhEquity, drawdown: pf.drawdown,
-          trades: pf.trades, metrics: metrics,
-          state: state, pending: pending,
-        };
-      }
-
-      return {run: run, runHybrid: runHybrid, signals: signals, sma: sma};
-    })();
   </script>
   <script>
     // Sidebar scroll-spy: pulse the active dot/label to the section currently
