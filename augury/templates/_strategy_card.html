@@ -136,19 +136,35 @@
             </div>
           </div>
 
-          <div class="metrics-row mt-3">
-            {% for k, v in s.metrics.items() %}
-              <div class="metric" tabindex="0">
-                <div class="metric-label">
-                  {{ k }}
-                  <span class="metric-info-icon" aria-hidden="true">i</span>
-                </div>
-                <div class="metric-value num" data-metric="{{ k }}">{{ v }}</div>
-                {% if s.metric_info and s.metric_info[k] %}
-                  <div class="metric-tooltip" role="tooltip">{{ s.metric_info[k] }}</div>
-                {% endif %}
-              </div>
-            {% endfor %}
+          <div class="metrics-compare mt-3 overflow-x-auto chip-scroll">
+            <table class="num">
+              <thead>
+                <tr>
+                  <th></th>
+                  {% for c in s.metrics %}
+                    <th title="{{ s.metric_info[c.key] if s.metric_info else '' }}">{{ c.key }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row-strat">
+                  <td>策略</td>
+                  {% for c in s.metrics %}
+                    <td data-metric="{{ c.key }}">{{ c.strat }}</td>
+                  {% endfor %}
+                </tr>
+                <tr class="row-bh">
+                  <td>B&amp;H <span class="bh-entry" data-bh-entry>{% if s.bh_entry %}@ {{ s.bh_entry }}{% endif %}</span></td>
+                  {% for c in s.metrics %}
+                    {% if c.bh is none %}
+                      <td class="na">-</td>
+                    {% else %}
+                      <td data-metric-bh="{{ c.key }}">{{ c.bh }}</td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-4">

@@ -1,0 +1,29 @@
+name: parity
+# The client-side JS backtest engine is a hand-port of the Python one. This
+# guards the two against silent drift: any push touching either engine (or the
+# parity tooling) re-runs `augury parity`, which replays the JS engine over the
+# committed data and asserts it matches Python at several window starts.
+on:
+  push:
+    paths:
+      - 'augury/backtest.py'
+      - 'augury/strategies/**'
+      - 'augury/static/backtest.js'
+      - 'augury/parity.py'
+      - 'augury/static/parity_check.mjs'
+  workflow_dispatch:
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -e .
+      - run: python -m augury parity

@@ -12,7 +12,7 @@ import pandas as pd
 from ._base import Strategy, OverlayLine
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SmaBand(Strategy):
     ma: int = 225
     threshold: float = 0.0
@@ -31,7 +31,14 @@ class SmaBand(Strategy):
         sma = close.rolling(self.ma).mean()
         upper = sma * (1 + self.threshold)
         lower = sma * (1 - self.threshold)
-        return close > upper, close < lower
+        # Cross-based, not level-based: enter only when close crosses UP
+        # through the upper band, exit only on a cross DOWN through the lower
+        # band — matching the spec ("上穿…做多,下穿平仓"). A level test
+        # (close > upper) would open a position on bar 1 whenever the window
+        # starts with price already above the band, which isn't a crossing.
+        entries = (close > upper) & (close.shift(1) <= upper.shift(1))
+        exits = (close < lower) & (close.shift(1) >= lower.shift(1))
+        return entries, exits
 
     def reference(self, close: pd.Series) -> dict:
         sma = close.rolling(self.ma).mean().dropna()

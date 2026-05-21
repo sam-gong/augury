@@ -106,7 +106,7 @@ def _label(enter_up, exit_down, exit_up) -> str:
     return f"Thermo {e} / {x}"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ThermoBand(Strategy):
     enter_up: tuple[int, ...] = ()
     exit_down: tuple[int, ...] = ()

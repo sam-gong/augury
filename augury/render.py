@@ -18,12 +18,16 @@ from augury.strategies import SmaBand, SmaCross
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 DOCS_DIR = ROOT / "docs"
 
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
     autoescape=select_autoescape(["html"]),
 )
+# The client-side backtest engine is its own file (single source of truth,
+# shared with parity_check.mjs); base.html inlines it via `{{ backtest_js }}`.
+env.globals["backtest_js"] = (STATIC_DIR / "backtest.js").read_text()
 
 
 def _now() -> str:
@@ -1428,6 +1432,12 @@ def _fmt_nav(v: float) -> str:
     return f"{v:.2f}×"
 
 
+def _fmt_price(v) -> str | None:
+    if v is None or pd.isna(v):
+        return None
+    return f"{v:,.2f}"
+
+
 def _strategy_serialize(strat) -> dict:
     """Serialize a strategy instance for the JS engine.
 
@@ -1542,22 +1552,31 @@ def _hybrid_payload(asset: dict, close: pd.Series, open_: pd.Series,
     }
 
 
-def _format_metrics(m: dict) -> dict:
-    return {
-        "CAGR": _fmt_pct(m.get("cagr"), 1),
-        "MDD": _fmt_pct_unsigned(m.get("max_drawdown"), 1),
-        "MAE": _fmt_pct_unsigned(m.get("mae"), 1),
-        "Vol": _fmt_pct_unsigned(m.get("vol"), 1),
-        "Sharpe": _fmt_num(m.get("sharpe")),
-        "Sortino": _fmt_num(m.get("sortino")),
-        "Calmar": _fmt_num(m.get("calmar")),
-        "WinRate": _fmt_pct_unsigned(m.get("win_rate"), 0),
-        "Payoff": _fmt_num(m.get("payoff"), 1),
-        "PF": _fmt_num(m.get("profit_factor"), 1),
-        "EndNAV": _fmt_nav(m.get("end_nav")),
-        "B&H": _fmt_nav(m.get("bh_end_nav")),
-        "Trades": str(m.get("total_trades", 0)),
-    }
+def _format_metrics(m: dict) -> list[dict]:
+    """One row per metric for the strategy-vs-buy&hold table: comparable
+    metrics first, then strategy-only ones (trade stats a perpetual hold has
+    no equivalent for) whose `bh` is None — rendered as a dimmed dash."""
+    return [
+        {"key": "CAGR", "strat": _fmt_pct(m.get("cagr"), 1),
+         "bh": _fmt_pct(m.get("bh_cagr"), 1)},
+        {"key": "MDD", "strat": _fmt_pct_unsigned(m.get("max_drawdown"), 1),
+         "bh": _fmt_pct_unsigned(m.get("bh_max_drawdown"), 1)},
+        {"key": "Vol", "strat": _fmt_pct_unsigned(m.get("vol"), 1),
+         "bh": _fmt_pct_unsigned(m.get("bh_vol"), 1)},
+        {"key": "Sharpe", "strat": _fmt_num(m.get("sharpe")),
+         "bh": _fmt_num(m.get("bh_sharpe"))},
+        {"key": "Sortino", "strat": _fmt_num(m.get("sortino")),
+         "bh": _fmt_num(m.get("bh_sortino"))},
+        {"key": "Calmar", "strat": _fmt_num(m.get("calmar")),
+         "bh": _fmt_num(m.get("bh_calmar"))},
+        {"key": "EndNAV", "strat": _fmt_nav(m.get("end_nav")),
+         "bh": _fmt_nav(m.get("bh_end_nav"))},
+        {"key": "MAE", "strat": _fmt_pct_unsigned(m.get("mae"), 1), "bh": None},
+        {"key": "WinRate", "strat": _fmt_pct_unsigned(m.get("win_rate"), 0), "bh": None},
+        {"key": "Payoff", "strat": _fmt_num(m.get("payoff"), 1), "bh": None},
+        {"key": "PF", "strat": _fmt_num(m.get("profit_factor"), 1), "bh": None},
+        {"key": "Trades", "strat": str(m.get("total_trades", 0)), "bh": None},
+    ]
 
 
 def _build_strategy_panel(asset: dict, close: pd.Series, open_: pd.Series,
@@ -1578,10 +1597,16 @@ def _build_strategy_panel(asset: dict, close: pd.Series, open_: pd.Series,
     else:
         result = backtest.run(close, strat, open_, start=start, fee=fee, slippage=slippage)
 
+    # B&H entry = open at the window's first bar (matches the JS engine; JS
+    # re-patches it as the date-range picker moves the window).
+    win_open = open_[open_.index >= pd.Timestamp(start)] if start else open_
+    bh_entry = float(win_open.iloc[0]) if len(win_open) else None
+
     panel = {
         "idx": idx,
         "id": f"strat-{idx}",
         "kind": "hybrid" if is_hybrid else "simple",
+        "bh_entry": _fmt_price(bh_entry),
         "label": strat.label(),
         "spec": strat.spec,
         "state": result.state,

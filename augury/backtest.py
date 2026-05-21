@@ -96,10 +96,12 @@ def run(close: pd.Series,
         init_capital: float = DEFAULT_INIT_CAPITAL) -> BacktestResult:
     """Run `strategy` against `close` with T+1 open execution.
 
-    `start=None` means "use all available data". We slice price BEFORE
-    computing rolling stats — so the SMA at the start of the window is
-    NaN, which produces no signal, which is the correct behavior (no
-    trading until enough history).
+    `start=None` means "use all available data". Signals are computed on
+    the FULL series first, then restricted to the [start, …] window — so
+    rolling indicators (SMA, crosses) warm up on pre-window history rather
+    than cold-starting at `start`. Slicing before computing them would
+    leave SMA(n) NaN for the first n bars of the window and silently
+    suppress trades there.
 
     T+1 mechanics: `strategy.signals(close)` produces entries/exits keyed
     by close-date T. We shift them forward one bar so vbt sees them at
@@ -108,19 +110,29 @@ def run(close: pd.Series,
     surfaced separately as `pending_action`."""
     close = close.dropna().astype(float)
     open_ = open_.reindex(close.index).astype(float)
-    if start is not None:
-        start_ts = pd.Timestamp(start)
-        close = close[close.index >= start_ts]
-        open_ = open_[open_.index >= start_ts]
     if close.empty:
         return _empty_result(close)
 
+    # Signals on the FULL series so rolling indicators warm up before the
+    # window; only after that do we restrict to [start, …].
     raw_entries, raw_exits = strategy.signals(close)
     raw_entries = raw_entries.astype("boolean").fillna(False).astype(bool)
     raw_exits = raw_exits.astype("boolean").fillna(False).astype(bool)
     # T+1 execution: yesterday's close-based signal fires today at open.
     entries = raw_entries.shift(1, fill_value=False)
     exits = raw_exits.shift(1, fill_value=False)
+
+    if start is not None:
+        start_ts = pd.Timestamp(start)
+        mask = close.index >= start_ts
+        close = close[mask]
+        open_ = open_[mask]
+        entries = entries[mask]
+        exits = exits[mask]
+        raw_entries = raw_entries[mask]
+        raw_exits = raw_exits[mask]
+        if close.empty:
+            return _empty_result(close)
 
     pf = vbt.Portfolio.from_signals(
         close, entries=entries, exits=exits,
@@ -251,10 +263,10 @@ def _metrics(pf, bh, equity: pd.Series, bh_equity: pd.Series,
         "payoff": payoff,
         "profit_factor": float(stats["Profit Factor"]) if "Profit Factor" in stats and not pd.isna(stats["Profit Factor"]) else float("nan"),
         "end_nav": float(equity.iloc[-1]),
-        "bh_end_nav": float(bh_equity.iloc[-1]),
         "total_trades": int(stats["Total Trades"]),
         "closed_trades": int(stats["Total Closed Trades"]),
         "open_trades": int(stats["Total Open Trades"]),
+        **_baseline_metrics(bh_equity),
     }
 
 
@@ -315,6 +327,26 @@ def _calmar(equity: pd.Series, mdd: float, n_returns: int) -> float:
     return ann / abs(mdd)
 
 
+def _baseline_metrics(bh_equity: pd.Series) -> dict:
+    """Return/risk metrics for the buy-and-hold baseline, computed with the
+    same conventions as the strategy ratios (the helpers above replicate
+    vbt's annualization). No trade stats — a hold is one perpetual position.
+    Mirrors `returnRisk()` in backtest.js so the B&H row passes parity."""
+    if bh_equity.empty:
+        return {}
+    rets = bh_equity.pct_change().dropna()
+    mdd = _max_drawdown(bh_equity)
+    return {
+        "bh_cagr": _cagr(bh_equity),
+        "bh_max_drawdown": mdd,
+        "bh_vol": _annualized_vol(rets),
+        "bh_sharpe": _sharpe(rets),
+        "bh_sortino": _sortino(rets),
+        "bh_calmar": _calmar(bh_equity, mdd, len(rets)),
+        "bh_end_nav": float(bh_equity.iloc[-1]),
+    }
+
+
 def _hybrid_metrics(equity: pd.Series, bh_equity: pd.Series,
                     trades: list[Trade]) -> dict:
     """Same metric set as `_metrics()`, computed without vectorbt."""
@@ -343,10 +375,10 @@ def _hybrid_metrics(equity: pd.Series, bh_equity: pd.Series,
         "payoff": abs(avg_win / avg_loss) if losses and avg_loss != 0 else float("nan"),
         "profit_factor": (win_pnl / loss_pnl) if loss_pnl > 0 else float("nan"),
         "end_nav": float(equity.iloc[-1]),
-        "bh_end_nav": float(bh_equity.iloc[-1]) if not bh_equity.empty else float("nan"),
         "total_trades": len(trades),
         "closed_trades": len(closed),
         "open_trades": len(open_t),
+        **_baseline_metrics(bh_equity),
     }
 
 
@@ -382,6 +414,15 @@ def run_hybrid(close: pd.Series,
         for t in subs
     })
 
+    # Signals on the FULL series so rolling indicators warm up before the
+    # window (see `run()` — slicing first would cold-start them).
+    raw_e, raw_x = strategy.base.signals(close)
+    raw_e = raw_e.astype("boolean").fillna(False).astype(bool)
+    raw_x = raw_x.astype("boolean").fillna(False).astype(bool)
+    # T+1 execution: signal at T fires at open[T+1]
+    entries = raw_e.shift(1, fill_value=False)
+    exits = raw_x.shift(1, fill_value=False)
+
     if start is not None:
         start_ts = pd.Timestamp(start)
         mask = close.index >= start_ts
@@ -389,16 +430,13 @@ def run_hybrid(close: pd.Series,
         open_ = open_[mask]
         sub_close = sub_close[mask]
         sub_open = sub_open[mask]
+        entries = entries[mask]
+        exits = exits[mask]
+        raw_e = raw_e[mask]
+        raw_x = raw_x[mask]
 
     if close.empty:
         return _empty_result(close)
-
-    raw_e, raw_x = strategy.base.signals(close)
-    raw_e = raw_e.astype("boolean").fillna(False).astype(bool)
-    raw_x = raw_x.astype("boolean").fillna(False).astype(bool)
-    # T+1 execution: signal at T fires at open[T+1]
-    entries = raw_e.shift(1, fill_value=False)
-    exits = raw_x.shift(1, fill_value=False)
 
     n = len(close)
     dates = close.index

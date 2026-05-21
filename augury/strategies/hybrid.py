@@ -6,7 +6,7 @@ When it says "re-enter primary", the basket is liquidated.
 
 Wrap any plain `Strategy` (entries/exits-based) to turn it into a hybrid:
 
-    HybridStrategy(base=SmaCross(5, 30), substitutes={"AZO": 0.5, "ORLY": 0.5})
+    HybridStrategy(base=SmaCross(fast=5, slow=30), substitutes={"AZO": 0.5, "ORLY": 0.5})
 
 Signals/overlays/reference all delegate to the base — the price chart still
 draws the base strategy's MA lines and entry/exit markers (those are
@@ -20,7 +20,7 @@ import pandas as pd
 from ._base import Strategy, OverlayLine
 
 
-@dataclass
+@dataclass(kw_only=True)
 class HybridStrategy(Strategy):
     base: Strategy = None
     # ticker -> weight (must sum to 1)

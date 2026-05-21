@@ -10,7 +10,7 @@ import pandas as pd
 from ._base import Strategy, OverlayLine
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SmaCross(Strategy):
     fast: int = 5
     slow: int = 30
@@ -26,7 +26,13 @@ class SmaCross(Strategy):
     def signals(self, close: pd.Series) -> tuple[pd.Series, pd.Series]:
         f = close.rolling(self.fast).mean()
         s = close.rolling(self.slow).mean()
-        return f > s, f < s
+        # Cross-based, not level-based: enter on a golden cross (fast crosses
+        # UP through slow), exit on a death cross — matching the spec
+        # ("上穿…做多,下穿平仓"). A level test (f > s) would open a position
+        # on bar 1 whenever the window starts already in a golden-cross state.
+        entries = (f > s) & (f.shift(1) <= s.shift(1))
+        exits = (f < s) & (f.shift(1) >= s.shift(1))
+        return entries, exits
 
     def reference(self, close: pd.Series) -> dict:
         f = close.rolling(self.fast).mean().dropna()

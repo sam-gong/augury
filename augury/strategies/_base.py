@@ -24,7 +24,7 @@ class OverlayLine:
     fill_to: str | None = None  # name of the line this one fills towards
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Strategy:
     """Subclasses must set `name` and `spec` (one-liner for display) and
     implement `signals(close)`, `overlay(close)`, and `reference(close)`."""
