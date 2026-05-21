@@ -11,9 +11,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
   <style>
     body { background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    /* Mobile: stop any over-wide child (e.g. a Plotly chart that rendered
+       before its responsive resize settled) from expanding the layout
+       viewport past the `md` breakpoint — that's what made the section chip
+       bar vanish on the charts-heavy 指数 page (desktop media query kicked in).
+       `clip` (not `hidden`) prevents horizontal scroll WITHOUT creating a
+       scroll container, so `position: sticky` keeps working. */
+    html, body { overflow-x: clip; }
+    .plotly-graph-div, .js-plotly-plot { max-width: 100%; }
     .brand { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; letter-spacing: 0.005em; }
     .card { background: #111; border: 1px solid #1f1f1f; border-radius: 8px; padding: 16px; }
     .num { font-variant-numeric: tabular-nums; }
+    /* Mobile section-nav chip row: hide the scrollbar but keep it scrollable. */
+    .chip-scroll::-webkit-scrollbar { display: none; }
+    .chip-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     .nav a { color: #999; padding: 4px 12px; border-radius: 4px; transition: all 120ms; }
     .nav a:hover { color: #fff; background: #1f1f1f; }
     .nav a.active { color: #fff; background: #1f1f1f; }
@@ -174,24 +185,50 @@
   </style>
 </head>
 <body data-page="overview">
-  <header class="sticky top-0 z-40 bg-[#0a0a0a] border-b border-zinc-800 px-6 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-6">
-      <h1 class="brand text-2xl">Augury</h1>
-      <nav class="nav flex gap-1 text-sm">
-        <a href="index.html" class="">大盘</a>
-        <a href="overview.html" class="active">策略</a>
-        <a href="cycle.html" class="">宏观</a>
+  <div class="sticky top-0 z-40">
+    <header class="bg-[#0a0a0a] border-b border-zinc-800 px-4 md:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-4 md:gap-6 min-w-0">
+        <h1 class="brand text-xl md:text-2xl shrink-0">Augury</h1>
+        <nav class="nav flex gap-1 text-sm">
+          <a href="index.html" class="">大盘</a>
+          <a href="overview.html" class="active">策略</a>
+          <a href="cycle.html" class="">宏观</a>
+        </nav>
+      </div>
+      <a href="health.html" class="text-xs num flex items-center gap-2 px-2 py-1 rounded transition-colors shrink-0
+         text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
+         title="点击查看数据健康详情">
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+        <span class="hidden sm:inline">2026-05-19 19:14 UTC</span>
+        
+      </a>
+    </header>
+
+    
+    
+      <nav class="md:hidden chip-scroll bg-[#0a0a0a] border-b border-zinc-800 overflow-x-auto">
+        <div class="flex gap-1.5 px-4 py-2 whitespace-nowrap">
+          
+            <a href="overview.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
+               bg-zinc-100 text-zinc-900 font-medium">总览</a>
+          
+            <a href="indices.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
+               text-zinc-400 bg-zinc-900/80 hover:bg-zinc-800">指数</a>
+          
+            <a href="stocks.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
+               text-zinc-400 bg-zinc-900/80 hover:bg-zinc-800">正股</a>
+          
+            <a href="learning.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
+               text-zinc-400 bg-zinc-900/80 hover:bg-zinc-800">学习仓</a>
+          
+            <a href="crypto.html" class="shrink-0 px-3 py-1 rounded-full text-xs transition-colors
+               text-zinc-400 bg-zinc-900/80 hover:bg-zinc-800">币</a>
+          
+        </div>
       </nav>
-    </div>
-    <a href="health.html" class="text-xs num flex items-center gap-2 px-2 py-1 rounded transition-colors
-       text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
-       title="点击查看数据健康详情">
-      <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
-      <span>2026-05-19 19:14 UTC</span>
-      
-    </a>
-  </header>
-  <main class="p-6 max-w-[1600px] mx-auto">
+    
+  </div>
+  <main class="p-4 md:p-6 max-w-[1600px] mx-auto">
     
 <div class="flex gap-8">
   <aside class="w-44 shrink-0 sticky top-20 self-start hidden md:block">
@@ -348,7 +385,8 @@
           <span class="text-xs text-zinc-600 num">9 个策略</span>
         </div>
         <div class="card !p-0 overflow-hidden">
-          <table class="w-full text-sm">
+         <div class="overflow-x-auto chip-scroll">
+          <table class="w-full text-sm min-w-[640px]">
             <thead class="text-xs text-zinc-500">
               <tr class="border-b border-zinc-800">
                 <th class="text-left  font-normal px-3 py-2">资产</th>
@@ -678,7 +716,7 @@
                     
                   </td>
                   <td class="px-3 py-2 text-right num">
-                    26 d
+                    27 d
                   </td>
                   <td class="px-3 py-2 num">
                     
@@ -688,7 +726,7 @@
                   </td>
                   <td class="px-3 py-2 text-right num">
                     
-                      <span class="font-medium text-rose-500">-2.26%</span>
+                      <span class="font-medium text-rose-500">-0.80%</span>
                     
                   </td>
                   <td class="px-3 py-2 text-right num">
@@ -698,7 +736,7 @@
                   </td>
                   <td class="px-3 py-2 text-right num">
                     
-                      vs MA120 <span class="font-medium">+3.56%</span>
+                      vs MA120 <span class="font-medium">+5.24%</span>
                     
                   </td>
                   <td class="px-3 py-2">
@@ -721,7 +759,7 @@
                     
                   </td>
                   <td class="px-3 py-2 text-right num">
-                    6 d
+                    7 d
                   </td>
                   <td class="px-3 py-2 num">
                     
@@ -741,7 +779,7 @@
                   </td>
                   <td class="px-3 py-2 text-right num">
                     
-                      温度 <span class="font-medium">24.33</span>
+                      温度 <span class="font-medium">27.76</span>
                     
                   </td>
                   <td class="px-3 py-2">
@@ -753,6 +791,7 @@
               
             </tbody>
           </table>
+         </div>
         </div>
       </section>
     
