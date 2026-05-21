@@ -550,7 +550,14 @@ def binance_btcusdt(indicator, existing):
     fitted the temperature strategy on Binance data — switching the source
     is what makes backtest numbers match the published table. First daily
     bar is 2017-08-17 UTC. No auth required. Crypto has no Adj Close, so we
-    set it equal to Close for schema compatibility with the yfinance fetchers."""
+    set it equal to Close for schema compatibility with the yfinance fetchers.
+
+    Endpoint is `data-api.binance.vision`, NOT `api.binance.com`: the latter
+    returns HTTP 451 from US IPs (Binance geo-blocks the US), and GitHub
+    Actions runners live in Azure US datacenters — so the daily CI refresh
+    failed on BTC every run. `data-api.binance.vision` is Binance's official
+    public market-data mirror with the identical /api/v3/klines interface and
+    bit-identical values, but without the geo-restriction."""
     if existing is not None and not existing.empty:
         start_ms = int(
             (existing.index[-1] + timedelta(days=1)).tz_localize("UTC").timestamp() * 1000
@@ -565,7 +572,7 @@ def binance_btcusdt(indicator, existing):
     rows: list = []
     cursor = start_ms
     while cursor < today_ms:
-        url = ("https://api.binance.com/api/v3/klines"
+        url = ("https://data-api.binance.vision/api/v3/klines"
                f"?symbol=BTCUSDT&interval=1d&startTime={cursor}&limit=1000")
         req = urllib.request.Request(url, headers=_BROWSER_HEADERS)
         with urllib.request.urlopen(req, timeout=20) as r:
