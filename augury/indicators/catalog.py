@@ -34,10 +34,20 @@ _price("NDX",   "^NDX",    "Nasdaq 100",       unit="$")
 # what an investor actually earns.
 _price("SPY",   "SPY",     "S&P 500 ETF",      unit="$")
 _price("QQQ",   "QQQ",     "Nasdaq 100 ETF",   unit="$")
-_price("VIX",   "^VIX",    "VIX",              unit="Index")
-_price("MOVE",  "^MOVE",   "ICE BofA MOVE",    unit="Index")
+_price("MOVE",  "^MOVE",   "ICE BofA MOVE",    unit="Index")  # 2002-11+ (yfinance hard limit; pre-2002 requires paid ICE/Bloomberg feed)
 _price("VIX3M", "^VIX3M",  "VIX 3-Month",      unit="Index")
-_price("SKEW",  "^SKEW",   "CBOE SKEW Index",  unit="Index")
+
+# CBOE direct: VIX/SKEW back to 1990-01 (yfinance ^VIX/^SKEW only cover 2000+).
+def _cboe(id, slug, title):
+    return register(Indicator(
+        id=id, title=title, fetcher=f.cboe,
+        source_url=f"https://www.cboe.com/tradable_products/vix/{slug.lower()}",
+        frequency="daily", value_column="Close", unit="Index",
+        params={"csv_url": f"https://cdn.cboe.com/api/global/us_indices/"
+                           f"daily_prices/{slug}_History.csv"},
+    ))
+_cboe("VIX",  "VIX",  "VIX")
+_cboe("SKEW", "SKEW", "CBOE SKEW Index")
 _price("US10Y", "^TNX",    "US 10Y Yield",     unit="%")
 register(Indicator(
     id="BTC", title="Bitcoin / USD",
@@ -172,8 +182,20 @@ _fred("FEDFUNDS", "Fed Funds Rate", frequency="monthly", unit="%", is_rate=True)
 _fred("DGS2",     "2Y Treasury",    frequency="daily",   unit="%", is_rate=True)
 _fred("DGS10",    "10Y Treasury",   frequency="daily",   unit="%", is_rate=True)
 _fred("T10Y2Y",   "10Y-2Y Spread",  frequency="daily",   unit="%", is_rate=True)
-_fred("BAMLH0A0HYM2", "ICE BofA US High Yield OAS",
-      frequency="daily", unit="%", is_rate=True)
+# FRED truncated this series to a rolling 3-year window in April 2026 (licensing
+# change with ICE BofA). We restore full 1996+ history from a Wayback snapshot
+# of the public CSV (captured 2025-11), then let FRED fill the tail.
+register(Indicator(
+    id="BAMLH0A0HYM2", title="ICE BofA US High Yield OAS",
+    source_url="https://fred.stlouisfed.org/series/BAMLH0A0HYM2",
+    frequency="daily", unit="%", is_rate=True,
+    fetcher=f.fred_with_wayback_backfill,
+    params={
+        "wayback_url": "https://web.archive.org/web/20251104204105if_/"
+                       "https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2",
+        "backfill_until": "2000-01-01",
+    },
+))
 
 
 # ---------- Liquidity ----------

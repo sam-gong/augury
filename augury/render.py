@@ -664,42 +664,73 @@ def _mini_sparkline(s: pd.Series, rangemode_tozero: bool = False,
                        config={"displayModeBar": False, "responsive": True})
 
 
-def _macro_card(series_id: str, label: str, fmt: str,
-                regime: callable | None = None,
-                description: str = "",
-                rangemode_tozero: bool = False) -> dict | None:
-    """Build one sparkline-style card for the index page macro stress row.
+def _medium_chart(s: pd.Series, y_range: list[float] | None = None,
+                  rangemode_tozero: bool = False,
+                  thresholds: list[tuple[float, str]] | None = None,
+                  value_fmt: str = "{:.2f}") -> str:
+    """Full-history line chart for index-page cards. Y-axis visible with
+    threshold annotations on the right edge; x-axis shows year labels.
+    `thresholds` is a list of (value, label) — label rendered next to the
+    line as a regime cue (e.g. (80, "贪婪"))."""
+    fig = go.Figure()
+    for t_val, t_label in (thresholds or []):
+        fig.add_hline(y=t_val, line=dict(color="#3f3f46", width=0.7, dash="dot"),
+                      annotation_text=f" {t_label} {value_fmt.format(t_val)}",
+                      annotation_position="top left",
+                      annotation_font=dict(color="#71717a", size=10))
+    fig.add_trace(go.Scatter(
+        x=s.index, y=s.values, mode="lines",
+        line=dict(color="#d4d4d8", width=1.3),
+        fill="tozeroy", fillcolor="rgba(212,212,216,0.05)",
+        hovertemplate="%{x|%Y-%m-%d}: %{y:.2f}<extra></extra>",
+    ))
+    # Mark the current value with a brighter dot + faint ring so the
+    # 'where are we now' read is instant even when the chart is busy.
+    last_x, last_y = s.index[-1], float(s.iloc[-1])
+    fig.add_trace(go.Scatter(
+        x=[last_x], y=[last_y], mode="markers",
+        marker=dict(color="#fafafa", size=7,
+                    line=dict(width=1.5, color="rgba(250,250,250,0.25)")),
+        hovertemplate="%{x|%Y-%m-%d}: %{y:.2f}<extra></extra>",
+        showlegend=False,
+    ))
+    yaxis = dict(
+        showgrid=True, gridcolor="#27272a", gridwidth=0.5,
+        tickfont=dict(color="#71717a", size=10),
+        zeroline=False, ticks="outside", tickcolor="#3f3f46", ticklen=3,
+    )
+    if y_range is not None:
+        yaxis["range"] = y_range
+    else:
+        yaxis["rangemode"] = "tozero" if rangemode_tozero else "normal"
+    fig.update_layout(
+        height=240, margin=dict(l=44, r=8, t=8, b=24),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        xaxis=dict(
+            showgrid=False, tickfont=dict(color="#71717a", size=10),
+            tickformat="%Y", ticks="outside", tickcolor="#3f3f46", ticklen=3,
+        ),
+        yaxis=yaxis,
+        hoverlabel=dict(bgcolor="#18181b", bordercolor="#3f3f46",
+                        font=dict(color="#e4e4e7", size=11)),
+    )
+    return fig.to_html(include_plotlyjs=False, full_html=False,
+                       config={"displayModeBar": False, "responsive": True})
 
-    `regime(value)` returns a short Chinese tag ('极度宽松' / '紧缩' / '') describing
-    the current reading vs historical extremes; rendered subtly below the number.
-    `description` is the hover-tooltip text on the ⓘ icon."""
-    s = _load_series(series_id)
-    if s is None or s.empty:
-        return None
-    s = s.dropna()
-    if s.empty:
-        return None
-    last_v = float(s.iloc[-1])
-    last_d = s.index[-1].strftime("%Y-%m-%d")
-    return {
-        "id": series_id,
-        "label": label,
-        "value": fmt.format(last_v),
-        "date": last_d,
-        "regime": regime(last_v) if regime else "",
-        "description": description,
-        "sparkline": _mini_sparkline(s, rangemode_tozero=rangemode_tozero),
-        "unhealthy": indicators.is_unhealthy(series_id),
-        "error": (indicators.meta(series_id) or {}).get("last_error"),
-    }
 
+def _chart_card(series_id: str, label: str, regime: callable | None,
+                description: str, thresholds: list[tuple[float, str]] | None,
+                fmt: str = "{:.2f}", y_range: list[float] | None = None,
+                rangemode_tozero: bool = False,
+                series: pd.Series | None = None) -> dict | None:
+    """Medium chart card (full history + percentile + threshold lines).
+    Renders into index.html's chart_card macro. Returns None when no data,
+    so the page silently skips broken indicators.
 
-def _sentiment_card(series_id: str, label: str, lo: float, hi: float,
-                    fmt: str, regime: callable | None, thresholds: list[float],
-                    description: str, series: pd.Series | None = None) -> dict | None:
-    """Sparkline-card for a bounded sentiment indicator (same shape as
-    `_macro_card`, rendered by index.html's `sparkline_card` macro). Pass
-    `series` directly for computed series (e.g. VIX/VIX3M ratio)."""
+    `series` lets us inject a computed series (e.g. VIX/VIX3M ratio) that
+    isn't a registered indicator. `thresholds` are (value, regime_label) so
+    each reference line gets a small in-chart annotation."""
     s = series if series is not None else _load_series(series_id)
     if s is None or s.empty:
         return None
@@ -707,15 +738,20 @@ def _sentiment_card(series_id: str, label: str, lo: float, hi: float,
     if s.empty:
         return None
     last_v = float(s.iloc[-1])
+    pct = float((s <= last_v).mean() * 100)
     return {
         "id": series_id,
         "label": label,
         "value": fmt.format(last_v),
         "date": s.index[-1].strftime("%Y-%m-%d"),
         "regime": regime(last_v) if regime else "",
+        "percentile": f"P{pct:.0f}",
+        "history_label": f"{s.index.min().year}–{s.index.max().year}",
         "description": description,
-        "sparkline": _mini_sparkline(s, y_range=[lo, hi], thresholds=thresholds),
-        "unhealthy": indicators.is_unhealthy(series_id),
+        "chart": _medium_chart(s, y_range=y_range,
+                               rangemode_tozero=rangemode_tozero,
+                               thresholds=thresholds, value_fmt=fmt),
+        "unhealthy": indicators.is_unhealthy(series_id) if series_id in indicators.REGISTRY else False,
         "error": (indicators.meta(series_id) or {}).get("last_error"),
     }
 
@@ -731,113 +767,103 @@ def _vix_term_ratio() -> pd.Series | None:
     return df["vix"] / df["vix3m"]
 
 
-def _sentiment_gauges() -> list[dict]:
-    """Bounded sentiment / risk indicators: CNN F&G, VIX term structure, SKEW.
-    Rendered as fixed-range sparklines with threshold reference lines."""
-    def fng_regime(v):
-        if v < 20: return "极度恐慌"
-        if v < 40: return "恐慌"
-        if v > 80: return "极度贪婪"
-        if v > 60: return "贪婪"
-        return "中性"
-
-    def skew_regime(v):
-        if v < 120: return "毫无防备"
-        if v > 150: return "极端防备"
-        if v > 140: return "高度警惕"
-        return ""
-
-    def vix_ratio_regime(v):
-        if v > 1.15: return "崩盘"
-        if v > 1.00: return "倒挂 · 危机"
-        if v < 0.80: return "平静"
-        return ""
-
-    cards = [
-        _sentiment_card("CNN_FEAR_GREED", "CNN 恐惧 / 贪婪",
-                        lo=0, hi=100, fmt="{:.0f}", regime=fng_regime,
-                        thresholds=[20, 80],
-                        description="CNN 综合 7 项市场指标(动量、强势、宽度、看涨看跌、垃圾债需求、波动率、避险需求)合成的情绪仪表盘。<20 极度恐慌(常为历史底部);>80 极度贪婪。曲线参考线 = 20 / 80。"),
-        _sentiment_card("VIX_VIX3M", "VIX / VIX3M 期限结构",
-                        lo=0.70, hi=1.30, fmt="{:.2f}", regime=vix_ratio_regime,
-                        thresholds=[1.00],
-                        description="VIX 当月 / VIX 3 月期权波动率比。正常 contango (<1) = 远期不确定性更高;倒挂 (>1) = 短期恐慌爆发,是危机模式的物理开关。曲线参考线 = 1.00。",
-                        series=_vix_term_ratio()),
-        _sentiment_card("SKEW", "SKEW 尾部风险",
-                        lo=100, hi=160, fmt="{:.1f}", regime=skew_regime,
-                        thresholds=[140],
-                        description="CBOE SKEW 指数,机构对深价外看跌期权的定价 = 黑天鹅尾部风险溢价。100 = 正态分布;<120 机构毫无防备(易被突袭);>140 高度警惕;>150 极端防备(常为暴风雨前夜)。曲线参考线 = 140。"),
-    ]
-    return [c for c in cards if c]
-
-
-def _position_gauges() -> list[dict]:
-    """Position indicator in its own section. NAAIM is weekly-updated investment
-    manager survey, distinct cadence from the daily sentiment row."""
-    def naaim_regime(v):
-        if v < 30:  return "机构极度空仓"
-        if v > 100: return "机构加杠杆"
-        return ""
-
-    cards = [
-        _sentiment_card("NAAIM_EXPOSURE", "NAAIM 机构仓位",
-                        lo=0, hi=150, fmt="{:.0f}%", regime=naaim_regime,
-                        thresholds=[30, 100],
-                        description="全美主动投资经理协会(NAAIM)调查的实际仓位敞口(0-200%)。<30 极度空仓(常为左侧买点);>100 加杠杆。比 AAII 散户调查更硬核 — 真金白银仓位而非问卷情绪。周更(周四发布)。曲线参考线 = 30 / 100。"),
-    ]
-    return [c for c in cards if c]
-
-
 def _macro_stress_cards() -> list[dict]:
-    """First batch of index-page indicators: macro stress sparklines.
-    10Y-2Y curve, HY OAS, MOVE — all daily FRED/yfinance, cheap to fetch."""
+    """Macro stress: yield curve, credit spreads, rate volatility."""
     def t10y2y_regime(v):
         if v < 0:   return "倒挂"
         if v > 1.5: return "陡峭"
         return ""
-
     def hyoas_regime(v):
         if v < 3.5: return "极度宽松"
         if v > 8.0: return "恐慌"
         if v > 5.5: return "压力"
         return ""
-
     def move_regime(v):
         if v < 80:  return "平静"
         if v > 150: return "恐慌"
         if v > 120: return "压力"
         return ""
-
     cards = [
-        _macro_card("T10Y2Y", "10Y-2Y 利差", "{:+.2f}%", t10y2y_regime,
+        _chart_card("T10Y2Y", "10Y-2Y 利差", t10y2y_regime,
+            thresholds=[(0, "倒挂"), (1.5, "陡峭")], fmt="{:+.2f}%",
             description="10 年期与 2 年期美债利差。倒挂 (<0) 历史上领先衰退 12-18 月,转正陡峭化常是周期触底信号。"),
-        _macro_card("BAMLH0A0HYM2", "高收益债利差", "{:.2f}%", hyoas_regime,
+        _chart_card("BAMLH0A0HYM2", "高收益债利差", hyoas_regime,
+            thresholds=[(3.5, "极度宽松"), (5.5, "压力"), (8.0, "恐慌")], fmt="{:.2f}%",
             description="美国高收益债相对国债的期权调整利差 (OAS),信用市场压力的硬指标。<3.5% 信用极度宽松;>5.5% 压力显现;>8% 危机模式。"),
-        _macro_card("MOVE", "MOVE 债波动率", "{:.1f}", move_regime,
+        _chart_card("MOVE", "MOVE 债波动率", move_regime,
+            thresholds=[(80, "平静"), (120, "压力"), (150, "恐慌")], fmt="{:.1f}",
             description="ICE BofA MOVE 指数,债市的 VIX,衡量未来一个月利率不确定性。<80 平静;>120 压力;>150 恐慌。"),
     ]
     return [c for c in cards if c]
 
 
 def _real_liquidity_cards() -> list[dict]:
-    """Second batch of sparklines: real-economy + Fed liquidity.
-    Copper/Gold ratio + Overnight RRP balance."""
+    """Real-economy + Fed liquidity: copper/gold cycle gauge + RRP balance."""
     def cugc_regime(v):
         if v < 0.15: return "衰退担忧"
         if v > 0.30: return "强增长预期"
         return ""
-
     def rrp_regime(v):
         if v < 200:  return "流动性红灯"
         if v > 1000: return "过剩"
         return ""
-
     cards = [
-        _macro_card("COPPER_GOLD", "铜金比 ×100", "{:.3f}", cugc_regime,
+        _chart_card("COPPER_GOLD", "铜金比 ×100", cugc_regime,
+            thresholds=[(0.15, "衰退担忧"), (0.30, "强增长")], fmt="{:.3f}",
             description="铜金比 ×100。铜代表实体工业需求 (Dr. Copper),金代表避险与货币超发,两者拔河反映周期与货币环境。历史上与 10Y 收益率高度同步;股市涨但铜金比跌通常是衰退式假牛市。"),
-        _macro_card("RRPONTSYD", "Fed 隔夜逆回购", "${:.0f}B",  rrp_regime,
+        _chart_card("RRPONTSYD", "Fed 隔夜逆回购", rrp_regime,
+            thresholds=[(200, "流动性红灯"), (1000, "过剩")], fmt="${:.0f}B",
             rangemode_tozero=True,
             description="美联储隔夜逆回购余额(十亿美元),金融系统过剩流动性的「血库」。2022 年峰值 2.5 万亿,逼近 0 时 QT 才会真正刺痛市场;预判流动性枯竭危机的先导指标。"),
+    ]
+    return [c for c in cards if c]
+
+
+def _sentiment_gauges() -> list[dict]:
+    """Bounded sentiment / risk indicators: CNN F&G, VIX term structure, SKEW."""
+    def fng_regime(v):
+        if v < 20: return "极度恐慌"
+        if v < 40: return "恐慌"
+        if v > 80: return "极度贪婪"
+        if v > 60: return "贪婪"
+        return "中性"
+    def skew_regime(v):
+        if v < 120: return "毫无防备"
+        if v > 150: return "极端防备"
+        if v > 140: return "高度警惕"
+        return ""
+    def vix_ratio_regime(v):
+        if v > 1.15: return "崩盘"
+        if v > 1.00: return "倒挂 · 危机"
+        if v < 0.80: return "平静"
+        return ""
+    cards = [
+        _chart_card("CNN_FEAR_GREED", "CNN 恐惧 / 贪婪", fng_regime,
+            thresholds=[(20, "极度恐慌"), (80, "极度贪婪")], fmt="{:.0f}",
+            y_range=[0, 100],
+            description="CNN 综合 7 项市场指标(动量、强势、宽度、看涨看跌、垃圾债需求、波动率、避险需求)合成的情绪仪表盘。<20 极度恐慌(常为历史底部);>80 极度贪婪。"),
+        _chart_card("VIX_VIX3M", "VIX / VIX3M 期限结构", vix_ratio_regime,
+            thresholds=[(1.00, "倒挂线")], fmt="{:.2f}",
+            description="VIX 当月 / VIX 3 月期权波动率比。正常 contango (<1) = 远期不确定性更高;倒挂 (>1) = 短期恐慌爆发,是危机模式的物理开关。",
+            series=_vix_term_ratio()),
+        _chart_card("SKEW", "SKEW 尾部风险", skew_regime,
+            thresholds=[(120, "毫无防备"), (140, "高度警惕"), (150, "极端防备")],
+            fmt="{:.1f}",
+            description="CBOE SKEW 指数,机构对深价外看跌期权的定价 = 黑天鹅尾部风险溢价。100 = 正态分布;<120 机构毫无防备(易被突袭);>140 高度警惕;>150 极端防备(常为暴风雨前夜)。"),
+    ]
+    return [c for c in cards if c]
+
+
+def _position_gauges() -> list[dict]:
+    """Position indicator: NAAIM weekly investment-manager survey."""
+    def naaim_regime(v):
+        if v < 30:  return "机构极度空仓"
+        if v > 100: return "机构加杠杆"
+        return ""
+    cards = [
+        _chart_card("NAAIM_EXPOSURE", "NAAIM 机构仓位", naaim_regime,
+            thresholds=[(30, "极度空仓"), (100, "加杠杆")], fmt="{:.0f}%",
+            description="全美主动投资经理协会(NAAIM)调查的实际仓位敞口(0-200%)。<30 极度空仓(常为左侧买点);>100 加杠杆。比 AAII 散户调查更硬核 — 真金白银仓位而非问卷情绪。周更(周四发布)。"),
     ]
     return [c for c in cards if c]
 
@@ -1648,6 +1674,20 @@ def _build_strategy_panel(asset: dict, close: pd.Series, open_: pd.Series,
         panel["ref_label"] = ref["label"]
         panel["dist_pct"] = ref["pct"]
         panel["dist_label"] = _fmt_pct(ref["pct"], 2)
+
+    # ThermoBand: expose the current thermometer reading on its own 0–100 scale.
+    # The generic ref pill shows "温度 +24%" (deviation from 50), which is fine
+    # for inter-strategy uniformity but doesn't surface "where on the dial."
+    # Adding a dedicated thermo pill lets the user read it at a glance.
+    from augury.strategies import ThermoBand
+    if isinstance(strat, ThermoBand) and ref.get("value") is not None:
+        v = float(ref["value"])
+        panel["thermo_current"] = f"{v:.1f}"
+        if v >= 80:   panel["thermo_band"] = "极热"
+        elif v >= 70: panel["thermo_band"] = "偏热"
+        elif v <= 20: panel["thermo_band"] = "极冷"
+        elif v <= 30: panel["thermo_band"] = "偏冷"
+        else:         panel["thermo_band"] = "中性"
 
     # Client-side recompute payload. Both simple AND hybrid have JS engines;
     # the JS reads `kind` to dispatch.

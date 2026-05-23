@@ -5,15 +5,15 @@
 {%- if text -%}
 <div class="group relative inline-flex items-center ml-1">
   <span class="text-zinc-600 hover:text-zinc-300 cursor-help text-[10px] leading-none transition-colors">ⓘ</span>
-  <div class="hidden group-hover:block absolute z-30 left-0 top-full mt-2 w-64 p-3 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800 rounded shadow-xl leading-relaxed normal-case tracking-normal font-normal pointer-events-none whitespace-normal">
+  <div class="hidden group-hover:block absolute z-30 left-0 top-full mt-2 w-72 p-3 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800 rounded shadow-xl leading-relaxed normal-case tracking-normal font-normal pointer-events-none whitespace-normal">
     {{ text }}
   </div>
 </div>
 {%- endif -%}
 {%- endmacro %}
 
-{% macro sparkline_card(c) %}
-<div class="card !p-3 relative">
+{% macro chart_card(c) %}
+<div class="card !p-4 relative">
   {% if c.unhealthy %}
     <span class="group absolute top-2 right-2 cursor-help">
       <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -22,53 +22,56 @@
       </span>
     </span>
   {% endif %}
-  <div class="flex items-center">
-    <div class="text-[10px] text-zinc-500 uppercase tracking-wider">{{ c.label }}</div>
-    {{ info_dot(c.description) }}
-  </div>
-  <div class="flex items-center gap-3 mt-1">
-    <div class="min-w-0 flex-1">
-      <div class="text-2xl font-semibold num text-zinc-100 leading-tight">{{ c.value }}</div>
-      <div class="text-[10px] text-zinc-600 num mt-0.5">
-        {{ c.date }}{% if c.regime %} · <span class="text-zinc-400">{{ c.regime }}</span>{% endif %}
-      </div>
+  <div class="flex items-baseline justify-between">
+    <div class="flex items-center min-w-0">
+      <div class="text-[11px] text-zinc-400 uppercase tracking-wider truncate">{{ c.label }}</div>
+      {{ info_dot(c.description) }}
     </div>
-    <div class="w-32 shrink-0">{{ c.sparkline|safe }}</div>
+    <div class="text-[10px] text-zinc-600 num shrink-0 ml-2">{{ c.history_label }}</div>
   </div>
+  <div class="flex items-baseline gap-3 mt-1">
+    <div class="text-3xl font-semibold num text-zinc-100 leading-none">{{ c.value }}</div>
+    {% if c.regime %}<div class="text-[11px] text-zinc-400">{{ c.regime }}</div>{% endif %}
+    <div class="ml-auto text-right">
+      <div class="text-[10px] text-zinc-600 num">{{ c.date }}</div>
+      <div class="text-[10px] text-zinc-500 num">历史百分位 {{ c.percentile }}</div>
+    </div>
+  </div>
+  <div class="mt-2 -mx-1">{{ c.chart|safe }}</div>
 </div>
 {% endmacro %}
 
 {% block content %}
   {% if macro_cards %}
-    <section class="mb-4">
+    <section class="mb-5">
       <div class="flex items-baseline justify-between mb-2">
         <h2 class="text-xs text-zinc-500 uppercase tracking-wider">宏观压力</h2>
         <span class="text-[10px] text-zinc-600">日更</span>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {% for c in macro_cards %}{{ sparkline_card(c) }}{% endfor %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {% for c in macro_cards %}{{ chart_card(c) }}{% endfor %}
       </div>
     </section>
   {% endif %}
 
   {% if liquidity_cards %}
-    <section class="mb-4">
+    <section class="mb-5">
       <div class="flex items-baseline justify-between mb-2">
         <h2 class="text-xs text-zinc-500 uppercase tracking-wider">实体 / 流动性</h2>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {% for c in liquidity_cards %}{{ sparkline_card(c) }}{% endfor %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {% for c in liquidity_cards %}{{ chart_card(c) }}{% endfor %}
       </div>
     </section>
   {% endif %}
 
   {% if gauge_cards %}
-    <section class="mb-4">
+    <section class="mb-5">
       <div class="flex items-baseline justify-between mb-2">
         <h2 class="text-xs text-zinc-500 uppercase tracking-wider">情绪 / 风险</h2>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {% for g in gauge_cards %}{{ sparkline_card(g) }}{% endfor %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {% for g in gauge_cards %}{{ chart_card(g) }}{% endfor %}
       </div>
     </section>
   {% endif %}
@@ -79,8 +82,8 @@
         <h2 class="text-xs text-zinc-500 uppercase tracking-wider">机构仓位</h2>
         <span class="text-[10px] text-zinc-600">周更</span>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {% for g in position_cards %}{{ sparkline_card(g) }}{% endfor %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {% for g in position_cards %}{{ chart_card(g) }}{% endfor %}
       </div>
     </section>
   {% endif %}

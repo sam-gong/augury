@@ -115,7 +115,13 @@
                 {% endif %}
                 <span class="text-zinc-600 ml-1">自 {{ s.state_since }}</span>
               </span>
-              {% if s.ref_label %}
+              {% if s.thermo_current %}
+                <span class="text-zinc-700">·</span>
+                <span class="num text-zinc-400">
+                  温度 <span class="text-zinc-200">{{ s.thermo_current }}</span>
+                  <span class="text-zinc-500 ml-1">{{ s.thermo_band }}</span>
+                </span>
+              {% elif s.ref_label %}
                 <span class="text-zinc-700">·</span>
                 <span class="text-zinc-500 num">
                   {{ s.ref_label }}

@@ -60,6 +60,75 @@ def fred(indicator, existing):
     return new
 
 
+def fred_with_wayback_backfill(indicator, existing):
+    """FRED fetcher for ICE BofA / other licensed series that got truncated
+    to a rolling N-year window. Strategy: one-shot Wayback CSV backfill (when
+    `existing` doesn't yet cover pre-truncation history), then incremental FRED
+    tail. params: {wayback_url} — full Wayback snapshot URL to fredgraph.csv."""
+    p = indicator.params
+    backfill_cutoff = pd.Timestamp(p.get("backfill_until", "2000-01-01"))
+    need_backfill = (
+        existing is None or existing.empty
+        or existing.index.min() > backfill_cutoff
+    )
+    frames: list[pd.DataFrame] = []
+    if need_backfill:
+        req = urllib.request.Request(p["wayback_url"], headers=_BROWSER_HEADERS)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            csv_bytes = r.read()
+        bf = pd.read_csv(io.BytesIO(csv_bytes))
+        date_col = next(c for c in bf.columns if "date" in c.lower())
+        val_col = next(c for c in bf.columns if c != date_col)
+        bf[date_col] = pd.to_datetime(bf[date_col], errors="coerce")
+        bf = (bf.dropna(subset=[date_col, val_col])
+                .rename(columns={date_col: "date", val_col: "value"})
+                .set_index("date").sort_index())
+        frames.append(bf)
+    tail = fred(indicator, existing)
+    if not tail.empty:
+        frames.append(tail)
+    if not frames:
+        return pd.DataFrame()
+    out = pd.concat(frames)
+    out = out[~out.index.duplicated(keep="last")].sort_index()
+    out.index.name = "date"
+    return out
+
+
+# ---------- CBOE direct CSVs ----------
+# CBOE publishes daily history for its own indices (VIX, SKEW, VIX3M, ...) on
+# its CDN, going back to each index's inception (VIX/SKEW: 1990-01). The CSVs
+# are open and stable, so we prefer them over yfinance's 2000+ shim for the
+# CBOE-native series. Schema is OHLC or single CLOSE depending on index.
+
+def cboe(indicator, existing):
+    """params: {csv_url}. Returns DataFrame in yfinance-compatible schema
+    (Open/High/Low/Close columns) so callers like _load_series stay uniform."""
+    url = indicator.params["csv_url"]
+    req = urllib.request.Request(url, headers=_BROWSER_HEADERS)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        raw = r.read()
+    df = pd.read_csv(io.BytesIO(raw))
+    df.columns = [c.strip().upper() for c in df.columns]
+    date_col = next(c for c in df.columns if c in ("DATE", "OBSERVATION_DATE"))
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+    df = df.dropna(subset=[date_col]).set_index(date_col).sort_index()
+    # SKEW etc. publish only the single closing level — fan it out to OHLC so
+    # the rest of the pipeline (value_column="Close") works unchanged.
+    if "CLOSE" not in df.columns:
+        val_col = next(c for c in df.columns if c != date_col)
+        df = df.rename(columns={val_col: "CLOSE"})
+    for col in ("OPEN", "HIGH", "LOW"):
+        if col not in df.columns:
+            df[col] = df["CLOSE"]
+    out = df[["OPEN", "HIGH", "LOW", "CLOSE"]].copy()
+    out.columns = ["Open", "High", "Low", "Close"]
+    out["Adj Close"] = out["Close"]
+    out["Volume"] = 0
+    out.index.name = "Date"
+    return out
+
+
 # ---------- yfinance ----------
 
 def yahoo(indicator, existing):
@@ -637,12 +706,36 @@ def copper_gold(indicator, existing):
 
 
 # ---------- CNN Fear & Greed Index ----------
+# CNN's public API only returns ~1 year of history. We splice in pre-2025 data
+# from the whit3rabbit/fear-greed-data GitHub mirror (active community archive,
+# daily readings since 2011-01) for the full picture.
+
+_CNN_FG_BACKFILL = ("https://raw.githubusercontent.com/whit3rabbit/"
+                    "fear-greed-data/main/fear-greed.csv")
+
 
 def cnn_fear_greed(indicator, existing):
-    """Fetches CNN's Fear & Greed history JSON. Always returns full
-    available history (≈ 1 year of daily points) — small payload, simpler
-    than incremental fetch. UA + Referer + Origin are mandatory; without
-    them CNN returns HTTP 418 "I'm a teapot. You're a bot.\""""
+    """CNN live tail (≈ 1 year) + whit3rabbit GitHub backfill (since 2011-01).
+    UA + Referer + Origin are mandatory for the live API; without them CNN
+    returns HTTP 418 \"I'm a teapot. You're a bot.\""""
+    frames: list[pd.DataFrame] = []
+
+    need_backfill = (
+        existing is None or existing.empty
+        or existing.index.min() > pd.Timestamp("2012-01-01")
+    )
+    if need_backfill:
+        req = urllib.request.Request(_CNN_FG_BACKFILL, headers=_BROWSER_HEADERS)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+        bf = pd.read_csv(io.BytesIO(raw))
+        bf["Date"] = pd.to_datetime(bf["Date"], errors="coerce")
+        bf = (bf.dropna(subset=["Date", "Fear Greed"])
+                .rename(columns={"Date": "date", "Fear Greed": "value"})
+                [["date", "value"]]
+                .set_index("date").sort_index())
+        frames.append(bf)
+
     url = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
     req = urllib.request.Request(url, headers={
         **_BROWSER_HEADERS,
@@ -652,9 +745,13 @@ def cnn_fear_greed(indicator, existing):
     with urllib.request.urlopen(req, timeout=20) as r:
         payload = json.load(r)
     rows = payload["fear_and_greed_historical"]["data"]
-    df = pd.DataFrame(rows)
-    df["date"] = pd.to_datetime(df["x"], unit="ms").dt.normalize()
-    out = df.set_index("date")[["y"]].rename(columns={"y": "value"})
+    live = pd.DataFrame(rows)
+    live["date"] = pd.to_datetime(live["x"], unit="ms").dt.normalize()
+    live = live.set_index("date")[["y"]].rename(columns={"y": "value"})
+    frames.append(live)
+
+    out = pd.concat(frames)
+    out = out[~out.index.duplicated(keep="last")].sort_index()
     out.index.name = "date"
     return out
 
