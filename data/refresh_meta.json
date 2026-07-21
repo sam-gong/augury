@@ -1,368 +1,368 @@
 {
   "SPX": {
-    "last_attempt": "2026-07-20T02:57:31Z",
-    "last_success": "2026-07-20T02:57:31Z",
+    "last_attempt": "2026-07-21T00:13:01Z",
+    "last_success": "2026-07-21T00:13:01Z",
     "last_error": null
   },
   "NDX": {
-    "last_attempt": "2026-07-20T02:57:32Z",
-    "last_success": "2026-07-20T02:57:32Z",
+    "last_attempt": "2026-07-21T00:13:02Z",
+    "last_success": "2026-07-21T00:13:02Z",
     "last_error": null
   },
   "SPY": {
-    "last_attempt": "2026-07-20T02:57:32Z",
-    "last_success": "2026-07-20T02:57:32Z",
+    "last_attempt": "2026-07-21T00:13:02Z",
+    "last_success": "2026-07-21T00:13:02Z",
     "last_error": null
   },
   "QQQ": {
-    "last_attempt": "2026-07-20T02:57:33Z",
-    "last_success": "2026-07-20T02:57:33Z",
+    "last_attempt": "2026-07-21T00:13:03Z",
+    "last_success": "2026-07-21T00:13:03Z",
     "last_error": null
   },
   "VIX": {
-    "last_attempt": "2026-07-20T02:57:34Z",
-    "last_success": "2026-07-20T02:57:34Z",
+    "last_attempt": "2026-07-21T00:13:04Z",
+    "last_success": "2026-07-21T00:13:04Z",
     "last_error": null
   },
   "MOVE": {
-    "last_attempt": "2026-07-20T02:57:33Z",
-    "last_success": "2026-07-20T02:57:33Z",
+    "last_attempt": "2026-07-21T00:13:03Z",
+    "last_success": "2026-07-21T00:13:03Z",
     "last_error": null
   },
   "VIX3M": {
-    "last_attempt": "2026-07-20T02:57:33Z",
-    "last_success": "2026-07-20T02:57:33Z",
+    "last_attempt": "2026-07-21T00:13:03Z",
+    "last_success": "2026-07-21T00:13:03Z",
     "last_error": null
   },
   "SKEW": {
-    "last_attempt": "2026-07-20T02:57:34Z",
-    "last_success": "2026-07-20T02:57:34Z",
+    "last_attempt": "2026-07-21T00:13:04Z",
+    "last_success": "2026-07-21T00:13:04Z",
     "last_error": null
   },
   "US10Y": {
-    "last_attempt": "2026-07-20T02:57:34Z",
-    "last_success": "2026-07-20T02:57:34Z",
+    "last_attempt": "2026-07-21T00:13:04Z",
+    "last_success": "2026-07-21T00:13:04Z",
     "last_error": null
   },
   "BTC": {
-    "last_attempt": "2026-07-20T02:57:35Z",
-    "last_success": "2026-07-20T02:57:35Z",
+    "last_attempt": "2026-07-21T00:13:05Z",
+    "last_success": "2026-07-21T00:13:05Z",
     "last_error": null
   },
   "NVDA": {
-    "last_attempt": "2026-07-20T02:57:36Z",
-    "last_success": "2026-07-20T02:57:36Z",
+    "last_attempt": "2026-07-21T00:13:06Z",
+    "last_success": "2026-07-21T00:13:06Z",
     "last_error": null
   },
   "TSLA": {
-    "last_attempt": "2026-07-20T02:57:36Z",
-    "last_success": "2026-07-20T02:57:36Z",
+    "last_attempt": "2026-07-21T00:13:06Z",
+    "last_success": "2026-07-21T00:13:06Z",
     "last_error": null
   },
   "AZO": {
-    "last_attempt": "2026-07-20T02:57:36Z",
-    "last_success": "2026-07-20T02:57:36Z",
+    "last_attempt": "2026-07-21T00:13:06Z",
+    "last_success": "2026-07-21T00:13:06Z",
     "last_error": null
   },
   "ORLY": {
-    "last_attempt": "2026-07-20T02:57:37Z",
-    "last_success": "2026-07-20T02:57:37Z",
+    "last_attempt": "2026-07-21T00:13:06Z",
+    "last_success": "2026-07-21T00:13:06Z",
     "last_error": null
   },
   "FICO": {
-    "last_attempt": "2026-07-20T02:57:37Z",
-    "last_success": "2026-07-20T02:57:37Z",
+    "last_attempt": "2026-07-21T00:13:07Z",
+    "last_success": "2026-07-21T00:13:07Z",
     "last_error": null
   },
   "META": {
-    "last_attempt": "2026-07-20T02:57:37Z",
-    "last_success": "2026-07-20T02:57:37Z",
+    "last_attempt": "2026-07-21T00:13:07Z",
+    "last_success": "2026-07-21T00:13:07Z",
     "last_error": null
   },
   "RKLB": {
-    "last_attempt": "2026-07-20T02:57:38Z",
-    "last_success": "2026-07-20T02:57:38Z",
+    "last_attempt": "2026-07-21T00:13:07Z",
+    "last_success": "2026-07-21T00:13:07Z",
     "last_error": null
   },
   "PLTR": {
-    "last_attempt": "2026-07-20T02:57:38Z",
-    "last_success": "2026-07-20T02:57:38Z",
+    "last_attempt": "2026-07-21T00:13:07Z",
+    "last_success": "2026-07-21T00:13:07Z",
     "last_error": null
   },
   "LLY": {
-    "last_attempt": "2026-07-20T02:57:38Z",
-    "last_success": "2026-07-20T02:57:38Z",
+    "last_attempt": "2026-07-21T00:13:08Z",
+    "last_success": "2026-07-21T00:13:08Z",
     "last_error": null
   },
   "NFLX": {
-    "last_attempt": "2026-07-20T02:57:39Z",
-    "last_success": "2026-07-20T02:57:39Z",
+    "last_attempt": "2026-07-21T00:13:08Z",
+    "last_success": "2026-07-21T00:13:08Z",
     "last_error": null
   },
   "APP": {
-    "last_attempt": "2026-07-20T02:57:39Z",
-    "last_success": "2026-07-20T02:57:39Z",
+    "last_attempt": "2026-07-21T00:13:08Z",
+    "last_success": "2026-07-21T00:13:08Z",
     "last_error": null
   },
   "AAPL": {
-    "last_attempt": "2026-07-20T02:57:39Z",
-    "last_success": "2026-07-20T02:57:39Z",
+    "last_attempt": "2026-07-21T00:13:09Z",
+    "last_success": "2026-07-21T00:13:09Z",
     "last_error": null
   },
   "COPPER_GOLD": {
-    "last_attempt": "2026-07-20T02:57:40Z",
-    "last_success": "2026-07-20T02:57:40Z",
+    "last_attempt": "2026-07-21T00:13:09Z",
+    "last_success": "2026-07-21T00:13:09Z",
     "last_error": null
   },
   "CNN_FEAR_GREED": {
-    "last_attempt": "2026-07-20T02:57:40Z",
-    "last_success": "2026-07-20T02:57:40Z",
+    "last_attempt": "2026-07-21T00:13:10Z",
+    "last_success": "2026-07-21T00:13:10Z",
     "last_error": null
   },
   "NAAIM_EXPOSURE": {
-    "last_attempt": "2026-07-20T02:57:40Z",
-    "last_success": "2026-07-20T02:57:40Z",
+    "last_attempt": "2026-07-21T00:13:10Z",
+    "last_success": "2026-07-21T00:13:10Z",
     "last_error": null
   },
   "NDFI": {
-    "last_attempt": "2026-07-20T02:57:41Z",
+    "last_attempt": "2026-07-21T00:13:11Z",
     "last_success": "2026-07-09T01:04:35Z",
     "last_error": "ImportError: Missing optional dependency 'html5lib'.  Use pip or conda to install html5lib."
   },
   "S5FI": {
-    "last_attempt": "2026-07-20T02:57:41Z",
-    "last_success": "2026-07-20T02:57:41Z",
+    "last_attempt": "2026-07-21T00:13:11Z",
+    "last_success": "2026-07-21T00:13:11Z",
     "last_error": null
   },
   "ISM_PMI": {
-    "last_attempt": "2026-07-20T02:59:18Z",
-    "last_success": "2026-07-20T02:59:18Z",
+    "last_attempt": "2026-07-21T00:14:32Z",
+    "last_success": "2026-07-21T00:14:32Z",
     "last_error": null
   },
   "ISM_NMI": {
-    "last_attempt": "2026-07-20T02:59:18Z",
-    "last_success": "2026-07-20T02:59:18Z",
+    "last_attempt": "2026-07-21T00:14:32Z",
+    "last_success": "2026-07-21T00:14:32Z",
     "last_error": null
   },
   "ISM_NEW_ORDERS": {
-    "last_attempt": "2026-07-20T02:59:18Z",
-    "last_success": "2026-07-20T02:59:18Z",
+    "last_attempt": "2026-07-21T00:14:32Z",
+    "last_success": "2026-07-21T00:14:32Z",
     "last_error": null
   },
   "ISM_INVENTORIES": {
-    "last_attempt": "2026-07-20T02:59:29Z",
-    "last_success": "2026-07-20T02:59:29Z",
+    "last_attempt": "2026-07-21T00:14:51Z",
+    "last_success": "2026-07-21T00:14:51Z",
     "last_error": null
   },
   "ISM_MFG_PRICES": {
-    "last_attempt": "2026-07-20T02:59:30Z",
-    "last_success": "2026-07-20T02:59:30Z",
+    "last_attempt": "2026-07-21T00:14:52Z",
+    "last_success": "2026-07-21T00:14:52Z",
     "last_error": null
   },
   "GACDFSA066MSFRBPHI": {
-    "last_attempt": "2026-07-20T02:59:31Z",
-    "last_success": "2026-07-20T02:59:31Z",
+    "last_attempt": "2026-07-21T00:14:53Z",
+    "last_success": "2026-07-21T00:14:53Z",
     "last_error": null
   },
   "GAFDFSA066MSFRBPHI": {
-    "last_attempt": "2026-07-20T02:59:31Z",
-    "last_success": "2026-07-20T02:59:31Z",
+    "last_attempt": "2026-07-21T00:14:54Z",
+    "last_success": "2026-07-21T00:14:54Z",
     "last_error": null
   },
   "CFNAI": {
-    "last_attempt": "2026-07-20T02:59:31Z",
-    "last_success": "2026-07-20T02:59:31Z",
+    "last_attempt": "2026-07-21T00:14:54Z",
+    "last_success": "2026-07-21T00:14:54Z",
     "last_error": null
   },
   "INDPRO": {
-    "last_attempt": "2026-07-20T02:59:32Z",
-    "last_success": "2026-07-20T02:59:32Z",
+    "last_attempt": "2026-07-21T00:14:55Z",
+    "last_success": "2026-07-21T00:14:55Z",
     "last_error": null
   },
   "NFCI": {
-    "last_attempt": "2026-07-20T02:59:32Z",
-    "last_success": "2026-07-20T02:59:32Z",
+    "last_attempt": "2026-07-21T00:14:55Z",
+    "last_success": "2026-07-21T00:14:55Z",
     "last_error": null
   },
   "FCI_G_1Y": {
-    "last_attempt": "2026-07-20T02:59:32Z",
-    "last_success": "2026-07-20T02:59:32Z",
+    "last_attempt": "2026-07-21T00:14:56Z",
+    "last_success": "2026-07-21T00:14:56Z",
     "last_error": null
   },
   "CRDQCNAPABIS": {
-    "last_attempt": "2026-07-20T02:59:32Z",
-    "last_success": "2026-07-20T02:59:32Z",
+    "last_attempt": "2026-07-21T00:14:56Z",
+    "last_success": "2026-07-21T00:14:56Z",
     "last_error": null
   },
   "FEDFUNDS": {
-    "last_attempt": "2026-07-20T02:59:32Z",
-    "last_success": "2026-07-20T02:59:32Z",
+    "last_attempt": "2026-07-21T00:14:56Z",
+    "last_success": "2026-07-21T00:14:56Z",
     "last_error": null
   },
   "DGS2": {
-    "last_attempt": "2026-07-20T02:59:33Z",
-    "last_success": "2026-07-20T02:59:33Z",
+    "last_attempt": "2026-07-21T00:14:57Z",
+    "last_success": "2026-07-21T00:14:57Z",
     "last_error": null
   },
   "DGS10": {
-    "last_attempt": "2026-07-20T02:59:33Z",
-    "last_success": "2026-07-20T02:59:33Z",
+    "last_attempt": "2026-07-21T00:14:57Z",
+    "last_success": "2026-07-21T00:14:57Z",
     "last_error": null
   },
   "T10Y2Y": {
-    "last_attempt": "2026-07-20T02:59:33Z",
-    "last_success": "2026-07-20T02:59:33Z",
+    "last_attempt": "2026-07-21T00:14:57Z",
+    "last_success": "2026-07-21T00:14:57Z",
     "last_error": null
   },
   "BAMLH0A0HYM2": {
-    "last_attempt": "2026-07-20T02:59:33Z",
-    "last_success": "2026-07-20T02:59:33Z",
+    "last_attempt": "2026-07-21T00:14:57Z",
+    "last_success": "2026-07-21T00:14:57Z",
     "last_error": null
   },
   "M2SL": {
-    "last_attempt": "2026-07-20T02:59:33Z",
-    "last_success": "2026-07-20T02:59:33Z",
+    "last_attempt": "2026-07-21T00:14:58Z",
+    "last_success": "2026-07-21T00:14:58Z",
     "last_error": null
   },
   "WALCL": {
-    "last_attempt": "2026-07-20T02:59:34Z",
-    "last_success": "2026-07-20T02:59:34Z",
+    "last_attempt": "2026-07-21T00:14:58Z",
+    "last_success": "2026-07-21T00:14:58Z",
     "last_error": null
   },
   "WTREGEN": {
-    "last_attempt": "2026-07-20T02:59:34Z",
-    "last_success": "2026-07-20T02:59:34Z",
+    "last_attempt": "2026-07-21T00:14:58Z",
+    "last_success": "2026-07-21T00:14:58Z",
     "last_error": null
   },
   "RRPONTSYD": {
-    "last_attempt": "2026-07-20T02:59:34Z",
-    "last_success": "2026-07-20T02:59:34Z",
+    "last_attempt": "2026-07-21T00:14:58Z",
+    "last_success": "2026-07-21T00:14:58Z",
     "last_error": null
   },
   "CPIAUCSL": {
-    "last_attempt": "2026-07-20T02:59:34Z",
-    "last_success": "2026-07-20T02:59:34Z",
+    "last_attempt": "2026-07-21T00:14:59Z",
+    "last_success": "2026-07-21T00:14:59Z",
     "last_error": null
   },
   "CPILFESL": {
-    "last_attempt": "2026-07-20T02:59:34Z",
-    "last_success": "2026-07-20T02:59:34Z",
+    "last_attempt": "2026-07-21T00:14:59Z",
+    "last_success": "2026-07-21T00:14:59Z",
     "last_error": null
   },
   "PCEPILFE": {
-    "last_attempt": "2026-07-20T02:59:35Z",
-    "last_success": "2026-07-20T02:59:35Z",
+    "last_attempt": "2026-07-21T00:15:00Z",
+    "last_success": "2026-07-21T00:15:00Z",
     "last_error": null
   },
   "PPIACO": {
-    "last_attempt": "2026-07-20T02:59:35Z",
-    "last_success": "2026-07-20T02:59:35Z",
+    "last_attempt": "2026-07-21T00:15:01Z",
+    "last_success": "2026-07-21T00:15:01Z",
     "last_error": null
   },
   "IR": {
-    "last_attempt": "2026-07-20T02:59:35Z",
-    "last_success": "2026-07-20T02:59:35Z",
+    "last_attempt": "2026-07-21T00:15:02Z",
+    "last_success": "2026-07-21T00:15:02Z",
     "last_error": null
   },
   "CSUSHPINSA": {
-    "last_attempt": "2026-07-20T02:59:35Z",
-    "last_success": "2026-07-20T02:59:35Z",
+    "last_attempt": "2026-07-21T00:15:03Z",
+    "last_success": "2026-07-21T00:15:03Z",
     "last_error": null
   },
   "CUSR0000SAH1": {
-    "last_attempt": "2026-07-20T02:59:36Z",
-    "last_success": "2026-07-20T02:59:36Z",
+    "last_attempt": "2026-07-21T00:15:04Z",
+    "last_success": "2026-07-21T00:15:04Z",
     "last_error": null
   },
   "CPIMEDSL": {
-    "last_attempt": "2026-07-20T02:59:36Z",
-    "last_success": "2026-07-20T02:59:36Z",
+    "last_attempt": "2026-07-21T00:15:04Z",
+    "last_success": "2026-07-21T00:15:04Z",
     "last_error": null
   },
   "T5YIE": {
-    "last_attempt": "2026-07-20T02:59:36Z",
-    "last_success": "2026-07-20T02:59:36Z",
+    "last_attempt": "2026-07-21T00:15:05Z",
+    "last_success": "2026-07-21T00:15:05Z",
     "last_error": null
   },
   "T10YIE": {
-    "last_attempt": "2026-07-20T02:59:36Z",
-    "last_success": "2026-07-20T02:59:36Z",
+    "last_attempt": "2026-07-21T00:15:05Z",
+    "last_success": "2026-07-21T00:15:05Z",
     "last_error": null
   },
   "MICH": {
-    "last_attempt": "2026-07-20T02:59:37Z",
-    "last_success": "2026-07-20T02:59:37Z",
+    "last_attempt": "2026-07-21T00:15:06Z",
+    "last_success": "2026-07-21T00:15:06Z",
     "last_error": null
   },
   "UNRATE": {
-    "last_attempt": "2026-07-20T02:59:37Z",
-    "last_success": "2026-07-20T02:59:37Z",
+    "last_attempt": "2026-07-21T00:15:07Z",
+    "last_success": "2026-07-21T00:15:07Z",
     "last_error": null
   },
   "ICSA": {
-    "last_attempt": "2026-07-20T02:59:37Z",
-    "last_success": "2026-07-20T02:59:37Z",
+    "last_attempt": "2026-07-21T00:15:07Z",
+    "last_success": "2026-07-21T00:15:07Z",
     "last_error": null
   },
   "PAYEMS": {
-    "last_attempt": "2026-07-20T02:59:37Z",
-    "last_success": "2026-07-20T02:59:37Z",
+    "last_attempt": "2026-07-21T00:15:08Z",
+    "last_success": "2026-07-21T00:15:08Z",
     "last_error": null
   },
   "JTSJOL": {
-    "last_attempt": "2026-07-20T02:59:37Z",
-    "last_success": "2026-07-20T02:59:37Z",
+    "last_attempt": "2026-07-21T00:15:09Z",
+    "last_success": "2026-07-21T00:15:09Z",
     "last_error": null
   },
   "JTSQUR": {
-    "last_attempt": "2026-07-20T02:59:37Z",
-    "last_success": "2026-07-20T02:59:37Z",
+    "last_attempt": "2026-07-21T00:15:10Z",
+    "last_success": "2026-07-21T00:15:10Z",
     "last_error": null
   },
   "CIVPART": {
-    "last_attempt": "2026-07-20T02:59:38Z",
-    "last_success": "2026-07-20T02:59:38Z",
+    "last_attempt": "2026-07-21T00:15:10Z",
+    "last_success": "2026-07-21T00:15:10Z",
     "last_error": null
   },
   "CES0500000003": {
-    "last_attempt": "2026-07-20T02:59:38Z",
-    "last_success": "2026-07-20T02:59:38Z",
+    "last_attempt": "2026-07-21T00:15:11Z",
+    "last_success": "2026-07-21T00:15:11Z",
     "last_error": null
   },
   "ATLANTA_FED_WAGE_TRACKER": {
-    "last_attempt": "2026-07-20T02:59:38Z",
-    "last_success": "2026-07-20T02:59:38Z",
+    "last_attempt": "2026-07-21T00:15:11Z",
+    "last_success": "2026-07-21T00:15:11Z",
     "last_error": null
   },
   "BLS_NEW_TENANT_RENT": {
-    "last_attempt": "2026-07-20T02:59:39Z",
-    "last_success": "2026-07-20T02:59:39Z",
+    "last_attempt": "2026-07-21T00:15:12Z",
+    "last_success": "2026-07-21T00:15:12Z",
     "last_error": null
   },
   "NYFED_INFL_EXP_1Y": {
-    "last_attempt": "2026-07-20T02:59:41Z",
-    "last_success": "2026-07-20T02:59:41Z",
+    "last_attempt": "2026-07-21T00:15:13Z",
+    "last_success": "2026-07-21T00:15:13Z",
     "last_error": null
   },
   "OECD_CLI_DIFFUSION": {
-    "last_attempt": "2026-07-20T02:59:41Z",
-    "last_success": "2026-07-20T02:59:41Z",
+    "last_attempt": "2026-07-21T00:15:14Z",
+    "last_success": "2026-07-21T00:15:14Z",
     "last_error": null
   },
   "ISM_NOC_MINUS_IVC": {
-    "last_attempt": "2026-07-20T02:59:44Z",
-    "last_success": "2026-07-20T02:59:44Z",
+    "last_attempt": "2026-07-21T00:15:17Z",
+    "last_success": "2026-07-21T00:15:17Z",
     "last_error": null
   },
   "ISM_COMPOSITE_PMI": {
-    "last_attempt": "2026-07-20T02:59:44Z",
-    "last_success": "2026-07-20T02:59:44Z",
+    "last_attempt": "2026-07-21T00:15:17Z",
+    "last_success": "2026-07-21T00:15:17Z",
     "last_error": null
   },
   "_run": {
-    "started_at": "2026-07-20T02:57:31Z",
-    "completed_at": "2026-07-20T02:59:44Z",
-    "duration_sec": 132.9,
+    "started_at": "2026-07-21T00:13:01Z",
+    "completed_at": "2026-07-21T00:15:17Z",
+    "duration_sec": 135.7,
     "ok": 71,
     "err": 1,
     "total": 72
