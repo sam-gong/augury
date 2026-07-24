@@ -1,0 +1,51 @@
+//@version=6
+// Augury "225 ±1%" — SMA breakout-with-band strategy
+// 入场: close > SMA(n) × (1 + threshold)   平仓: close < SMA(n) × (1 − threshold)
+// 中间 ±threshold 为中性区,持仓不动。多头-only,全仓进出。
+// 成交语义对齐 augury: 信号按收盘价 T 计算,下一根开盘 (T+1) 成交,手续费每边 3bp,无滑点。
+strategy("Augury SMA Band 225 ±1%",
+     overlay              = true,
+     initial_capital      = 1000000,  // 设大以避免 TV 整数股取整(augury 用零碎股,100 即可)
+     default_qty_type     = strategy.percent_of_equity,
+     default_qty_value     = 99,   // 留 1% 缓冲给手续费,否则 100% 下单时订单金额+手续费 > 权益,TV 会静默拒单/爆仓
+     pyramiding           = 0,
+     commission_type      = strategy.commission.percent,
+     commission_value     = 0.03,
+     process_orders_on_close = false,
+     calc_on_every_tick   = false)
+
+n         = input.int(225,   "SMA 周期",  minval = 1)
+threshold = input.float(1.0, "阈值 %",    minval = 0, step = 0.1) / 100.0
+startTime = input.time(timestamp("2015-01-01 00:00 +0000"), "回测开始时间")
+endTime   = input.time(timestamp("2099-01-01 00:00 +0000"), "回测结束时间")  // 默认至今
+
+inWindow = time >= startTime and time <= endTime
+
+sma   = ta.sma(close, n)
+upper = sma * (1 + threshold)
+lower = sma * (1 - threshold)
+
+// 上穿上轨开多、下穿下轨平仓(穿越,而非「已在带上方」)
+longCond = inWindow and ta.crossover(close, upper)
+exitCond = ta.crossunder(close, lower)
+
+if longCond
+    strategy.entry("Long", strategy.long)
+if exitCond or not inWindow
+    strategy.close("Long")
+
+// ── 诊断:标出每一次穿越(与持仓无关),用于在 TV 图上核对 ──
+//   绿色上三角 = 检测到上穿上轨(本应触发开仓);若该处没有 Buy 标记 → 是下单/持仓问题。
+//   若该处连绿三角都没有 → 是 TV 的均线/数据和我们不一致。
+plotshape(inWindow and ta.crossover(close, upper), title = "↑ 上穿上轨",
+     location = location.belowbar, style = shape.triangleup,   color = color.lime,    size = size.tiny)
+plotshape(inWindow and ta.crossunder(close, lower), title = "↓ 下穿下轨",
+     location = location.abovebar, style = shape.triangledown, color = color.fuchsia, size = size.tiny)
+
+// ── 可视化 ──
+maPlot = plot(sma,   "SMA 225", color = color.new(color.orange, 0),  linewidth = 2)
+upPlot = plot(upper, "+1% 上轨", color = color.new(color.orange, 60), style = plot.style_linebr)
+loPlot = plot(lower, "−1% 下轨", color = color.new(color.orange, 60), style = plot.style_linebr)
+fill(upPlot, loPlot, color = color.new(color.orange, 90), title = "中性区")
+
+bgcolor(strategy.position_size > 0 ? color.new(color.teal, 92) : na, title = "持仓中")
