@@ -541,6 +541,23 @@ def _summary(prices: dict) -> dict:
     return s
 
 
+def _inject_cross_asset_signal(strat, prices: dict) -> bool:
+    """Give cross-asset strategies their signal asset's close series.
+
+    Cross-asset strategies (e.g. BTC→META) are keyed by a DIFFERENT ticker
+    than the host asset, so `signals()` can't work off `close` alone.
+    Duck-typed: any strategy carrying both attributes participates. Returns
+    False when the signal asset's prices aren't loaded — callers decide
+    whether that's a skip or a hard error."""
+    if not (hasattr(strat, "signal_ticker") and hasattr(strat, "signal_close")):
+        return True
+    sig_df = prices.get(strat.signal_ticker)
+    if sig_df is None or sig_df.empty:
+        return False
+    strat.signal_close = sig_df["Close"]
+    return True
+
+
 def _signals_status(prices: dict) -> list[dict]:
     """Current signal status for every (asset, strategy) pair across all
     strategy pages — the dashboard's status board.
@@ -561,6 +578,8 @@ def _signals_status(prices: dict) -> list[dict]:
             close = df["Close"].dropna()
             open_ = df["Open"].reindex(close.index)
             for strat in strategies:
+                if not _inject_cross_asset_signal(strat, prices):
+                    continue  # skip — signal asset's data missing
                 if hasattr(strat, "prepare"):
                     strat.prepare(df)
                 result = backtest.run(
@@ -1476,7 +1495,7 @@ def _strategy_serialize(strat) -> dict:
     thermo array travels alongside `close`/`open` in the payload itself
     (see `_strategy_payload`). The JS engine just applies threshold
     crossings to that pre-computed series."""
-    from augury.strategies import HybridStrategy, ThermoBand
+    from augury.strategies import HybridStrategy, ThermoBand, CrossAssetSmaBand
     if isinstance(strat, HybridStrategy):
         # Hybrid uses the BASE strategy's signals — we only need to serialize
         # that. Substitutes travel separately in the hybrid payload.
@@ -1492,6 +1511,14 @@ def _strategy_serialize(strat) -> dict:
                 "params": {"enter_up": list(strat.enter_up),
                            "exit_down": list(strat.exit_down),
                            "exit_up": list(strat.exit_up)}}
+    if isinstance(strat, CrossAssetSmaBand):
+        # Signal source is a DIFFERENT asset's MA; we can't reproduce it in
+        # JS from META's close alone. Ship precomputed entries/exits and let
+        # JS slice them like the thermo precompute pattern.
+        return {"type": "precomp_band",
+                "params": {"signal_ticker": strat.signal_ticker,
+                           "ma": int(strat.ma),
+                           "threshold": float(strat.threshold)}}
     raise ValueError(f"unknown strategy type for serialization: {type(strat).__name__}")
 
 
@@ -1535,6 +1562,16 @@ def _strategy_payload(asset: dict, close: pd.Series, open_: pd.Series, strat,
         payload["thermo"] = [
             float(v) if pd.notna(v) else None for v in th.values
         ]
+    from augury.strategies import CrossAssetSmaBand
+    if isinstance(strat, CrossAssetSmaBand):
+        # Signals depend on a DIFFERENT asset's price (e.g. BTC). JS engine
+        # can't reproduce them from `close` alone, so precompute entries/
+        # exits server-side over the full window and ship as bool arrays.
+        # The JS slicer just clips them to the user's date range — same
+        # pattern as ThermoBand's precomputed thermometer.
+        raw_e, raw_x = strat.signals(close)
+        payload["precomp_entries"] = [bool(v) for v in raw_e.values]
+        payload["precomp_exits"]   = [bool(v) for v in raw_x.values]
     return payload
 
 
@@ -1613,6 +1650,10 @@ def _build_strategy_panel(asset: dict, close: pd.Series, open_: pd.Series,
     the caller can use the first panel's overlays/trades for the price chart."""
     from augury.strategies import HybridStrategy
     is_hybrid = isinstance(strat, HybridStrategy)
+    if not _inject_cross_asset_signal(strat, prices):
+        raise RuntimeError(
+            f"Strategy {strat.label()} needs '{strat.signal_ticker}' prices, "
+            f"not loaded")
     # Strategies that need OHLCV (e.g. ThermoBand) get the asset's full df
     # via prepare(); close-only strategies inherit the no-op default.
     strat.prepare(prices[asset["ticker"]])

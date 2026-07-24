@@ -8,7 +8,8 @@ Each chart's `spec` field carries the exact data series IDs and transforms,
 so a future implementer doesn't pick the wrong variant of a similarly-named
 series. The renderer falls back to a placeholder if data is missing."""
 
-from augury.strategies import SmaBand, SmaCross, HybridStrategy, ThermoBand
+from augury.strategies import (SmaBand, SmaCross, HybridStrategy, ThermoBand,
+                               CrossAssetSmaBand)
 from augury.backtest import DEFAULT_START
 
 PRICE_IDS = ["SPX", "NDX", "SPY", "QQQ", "VIX", "US10Y", "BTC",
@@ -478,7 +479,13 @@ STRATEGY_PAGES = {
         "layout": "full",
         "sections": [
             _asset("FICO", "Fair Isaac", "FICO"),
-            _asset("META", "Meta",       "META"),
+            _asset("META", "Meta",       "META", strategies=[
+                SmaCross(fast=20, slow=50),   # 教科书参数,保守锚
+                SmaCross(fast=22, slow=40),   # 扫描甜点,在高原中心
+                SmaBand(ma=130, threshold=0.03),  # 不同流派分散
+                CrossAssetSmaBand(signal_ticker="BTC", ma=120, threshold=0.01),
+                # BTC 24/7 历法 SMA(120) ±1% — 跨资产 regime 信号:段3 Calmar 2.41
+            ]),
             _asset("RKLB", "Rocket Lab", "RKLB"),
             _asset("PLTR", "Palantir",   "PLTR"),
             _asset("LLY",  "Eli Lilly",  "LLY"),

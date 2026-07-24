@@ -87,10 +87,22 @@ var Backtest = (function() {
     return {entries: en, exits: ex, overlays: {}};
   }
 
+  // precomp_band: cross-asset SmaBand (e.g. BTC→META). Signal source is a
+  // different asset whose MA can't be reproduced from `close` alone, so the
+  // server precomputed entries/exits aligned to `close` — we just pass them
+  // through. Same pattern as thermo, but here the precompute is the
+  // signals themselves rather than a continuous oscillator.
+  function signalsPrecompBand(close, p, slice) {
+    return {entries: slice.precomp_entries || [],
+            exits:   slice.precomp_exits   || [],
+            overlays: {}};
+  }
+
   function signals(close, strategy, slice) {
-    if (strategy.type === 'sma_band')  return signalsSmaBand(close, strategy.params);
-    if (strategy.type === 'sma_cross') return signalsSmaCross(close, strategy.params);
-    if (strategy.type === 'thermo')    return signalsThermo(close, strategy.params, slice.thermo);
+    if (strategy.type === 'sma_band')     return signalsSmaBand(close, strategy.params);
+    if (strategy.type === 'sma_cross')    return signalsSmaCross(close, strategy.params);
+    if (strategy.type === 'thermo')       return signalsThermo(close, strategy.params, slice.thermo);
+    if (strategy.type === 'precomp_band') return signalsPrecompBand(close, strategy.params, slice);
     throw new Error('unknown strategy: ' + strategy.type);
   }
 
@@ -355,7 +367,9 @@ var Backtest = (function() {
     // (NaN for the first n bars of the window) and silently delay the
     // first trade — mirrors augury.backtest.run.
     var sigFull = signals(payload.close, payload.strategy,
-                          {thermo: payload.thermo});
+                          {thermo: payload.thermo,
+                           precomp_entries: payload.precomp_entries,
+                           precomp_exits:   payload.precomp_exits});
     var dates = payload.dates;
     var i0 = _startIdx(dates, startDate);
     var i1 = dates.length - 1;
@@ -572,7 +586,9 @@ var Backtest = (function() {
     // same rationale as `run()`. The basket loop starts flat at i=0
     // regardless, so no carry-in is needed here.
     var sigFull = signals(payload.close, payload.strategy,
-                          {thermo: payload.thermo});
+                          {thermo: payload.thermo,
+                           precomp_entries: payload.precomp_entries,
+                           precomp_exits:   payload.precomp_exits});
     var i0 = _startIdx(payload.dates, startDate);
     var entries = sigFull.entries.slice(i0, i0 + n);
     var exits   = sigFull.exits.slice(i0, i0 + n);

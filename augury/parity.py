@@ -20,7 +20,8 @@ import pandas as pd
 
 from augury import backtest, indicators, layout
 from augury.render import (
-    STRATEGY_PAGE_KEYS, _hybrid_payload, _json_safe, _strategy_payload,
+    STRATEGY_PAGE_KEYS, _hybrid_payload, _inject_cross_asset_signal,
+    _json_safe, _strategy_payload,
 )
 from augury.strategies import HybridStrategy
 
@@ -58,6 +59,8 @@ def _asset_fixtures(asset: dict, prices: dict) -> list[dict]:
 
     out = []
     for strat in strategies:
+        if not _inject_cross_asset_signal(strat, prices):
+            continue  # skip — signal asset's data missing
         strat.prepare(df)
         cases, full = [], None
         for start in starts:
