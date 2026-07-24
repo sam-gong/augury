@@ -11,26 +11,24 @@ but we typically recover 2015-09 onward, which extends the chart back ~5 years
 before DBnomics. The framework's `refresh()` preserves backfilled rows because
 the merge keeps existing dates when the new fetch doesn't include them.
 
-Run once: `python scripts/backfill_ism_subindices.py`.
+Run once: `python -m augury.indicators.backfill_ism`.
 Idempotent: re-running only fetches PDFs for months not already in parquet.
 """
 import json
 import re
-import sys
 import urllib.error
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from augury.indicators.fetchers import _download, _parse_ism_pdf
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "indicators"
+DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "indicators"
 # Wayback-sourced historical PDFs are cached here because ISM is hostile to
 # scrapers (random URL prefixes, no public archive) and Wayback can lose
 # snapshots. Daily refresh's "live tail" PDFs are NOT cached — they're
 # trivially re-fetchable from ISM's CDN any day.
-PDF_CACHE = Path(__file__).resolve().parents[1] / "data" / "raw_pdfs" / "ISM_MFG"
+PDF_CACHE = Path(__file__).resolve().parents[2] / "data" / "raw_pdfs" / "ISM_MFG"
 
 # (parquet_id, PDF row label)
 SUBINDICES = [

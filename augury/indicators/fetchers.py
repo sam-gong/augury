@@ -399,7 +399,7 @@ def ism_subindex(indicator, existing):
     with keep='last' so revisions actually land in parquet). Older months are
     only fetched when missing from `existing`. Net cost: ~10s/indicator in
     steady state (2 PDFs) vs. the original always-fetch-all (~50s). Pre-2021
-    history comes from `scripts/backfill_ism_subindices.py`, served from the
+    history comes from `augury.indicators.backfill_ism`, served from the
     local PDF cache at `data/raw_pdfs/ISM_MFG/` to avoid Wayback dependency."""
     p = indicator.params
     rows: list[tuple[pd.Timestamp, float]] = []

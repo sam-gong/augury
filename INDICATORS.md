@@ -47,7 +47,7 @@ PMI 是同步指标;看它的领先指标预判未来 2-12 月方向。
 | Card | 芝加哥联储 CFNAI | `CFNAI` | FRED | M |
 | Card | 工业产出 INDPRO | `INDPRO` | FRED | M |
 
-**ISM 子项数据源备注:** ISM 2017 年起诉 FRED 后下架了所有 NAPMxxx,免费来源高度受限。我们用 DBnomics 拿 5 年(2021-01+),最新 8 个月用 ISM 官网 PDF 解析,更早历史通过 Wayback 上的历史 PDF 一次性回填(见 [scripts/backfill_ism_subindices.py](scripts/backfill_ism_subindices.py))。
+**ISM 子项数据源备注:** ISM 2017 年起诉 FRED 后下架了所有 NAPMxxx,免费来源高度受限。我们用 DBnomics 拿 5 年(2021-01+),最新 8 个月用 ISM 官网 PDF 解析,更早历史通过 Wayback 上的历史 PDF 一次性回填(见 [augury/indicators/backfill_ism.py](augury/indicators/backfill_ism.py))。
 
 ---
 
