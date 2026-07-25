@@ -15,7 +15,7 @@
       <section id="{{ sec.key }}" class="scroll-mt-4 space-y-4">
         <div>
           <h3 class="text-sm text-zinc-300 font-medium">{{ sec.label }}</h3>
-          {% if sec.subtitle %}<p class="text-xs text-zinc-500 mt-1">{{ sec.subtitle }}</p>{% endif %}
+          {% if sec.subtitle %}<p class="text-xs text-zinc-500 mt-1">{{ sec.subtitle|safe }}</p>{% endif %}
         </div>
 
         {# ---- Featured charts (full-width) ---- #}
@@ -26,7 +26,7 @@
                 <div class="flex items-start justify-between gap-3 mb-2">
                   <div class="min-w-0">
                     <div class="text-sm font-medium text-zinc-200">{{ chart.title }}</div>
-                    <div class="text-xs text-zinc-500 mt-0.5 leading-relaxed">{{ chart.desc }}</div>
+                    <div class="text-xs text-zinc-500 mt-0.5 leading-relaxed">{{ chart.desc|safe }}</div>
                     {% if chart.spec %}
                       <div class="text-[10px] text-zinc-600 mt-1 num leading-snug">{{ chart.spec }}</div>
                     {% endif %}

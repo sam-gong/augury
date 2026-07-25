@@ -133,10 +133,15 @@ def cboe(indicator, existing):
 
 def yahoo(indicator, existing):
     ticker = indicator.params["ticker"]
+    # `start` is where a *from-scratch* fetch begins; it does not auto-backfill
+    # an existing parquet. Yahoo can't distinguish "we widened the window" from
+    # "this ticker IPO'd later than the floor" — both look like a cache that
+    # doesn't reach `start`, so any backfill check refires on every single run
+    # for TSLA, META, PLTR, ... To widen a window, delete the parquet and rerun.
     if existing is not None and not existing.empty:
         start = (existing.index[-1] + timedelta(days=1)).strftime("%Y-%m-%d")
     else:
-        start = "2000-01-01"
+        start = indicator.params.get("start", "2000-01-01")
     today = date.today().strftime("%Y-%m-%d")
     if start >= today:
         return pd.DataFrame()
@@ -558,11 +563,16 @@ def oecd_cli_diffusion(indicator, existing):
     Matches MacroMicro's chart (denominator 17 economies = G7 + Australia +
     Korea + Mexico + Spain + Turkey + BRICS+IDN). A5M is OECD's "5 Major
     Asian Economies" aggregate and must be excluded too — it's 3 chars so
-    the len-3 filter doesn't catch it."""
+    the len-3 filter doesn't catch it.
+
+    History runs to 1960, but the denominator thins going back: ~17 economies
+    from 2000, ~16 in the 1990s, ~10 in the 1980s, ~7 in the 1960s-70s. The
+    ratio stays comparable but pre-1990 readings are coarser (one country
+    flipping moves it ~10pt instead of ~6pt)."""
     from io import StringIO
     url = ("https://sdmx.oecd.org/public/rest/data/"
            "OECD.SDD.STES,DSD_STES@DF_CLI/.M.LI.IX..AA...H/"
-           "?startPeriod=2000-01&format=csv")
+           "?startPeriod=1960-01&format=csv")
     text = _download(url).decode("utf-8", errors="ignore")
     df = pd.read_csv(StringIO(text))
     aggregates = {"OECD", "OECDE", "G7", "G20", "G4E", "NAFTA", "A5M",

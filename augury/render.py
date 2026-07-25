@@ -1875,6 +1875,55 @@ def render_health_page() -> None:
     (DOCS_DIR / "health.html").write_text(html)
 
 
+_TIER_STYLE = {
+    "稳健":     ("bg-emerald-500/15 text-emerald-400", "", "text-emerald-400"),
+    "样本短":   ("bg-sky-500/15 text-sky-400",         "", "text-sky-400"),
+    "近期有效": ("bg-amber-500/15 text-amber-500",     "", "text-amber-500"),
+    "同步":     ("bg-zinc-700/40 text-zinc-400",       "", "text-zinc-400"),
+    "无效":     ("bg-zinc-800/60 text-zinc-600", "opacity-55", "text-zinc-600"),
+}
+
+
+def render_leadlag_page() -> None:
+    """The measured-lead-time table behind every "领先 Nm" label on cycle.html.
+
+    Deliberately shows failures too — a reader who only sees the four that
+    passed has no way to judge how hard passing was."""
+    from augury import leadlag
+
+    tables = []
+    for key, note in [
+        ("pmi", "PMI 是同步指标,所以这张表问的是:哪些东西能提前告诉我们 PMI 要往哪走。"),
+        ("spx", "同一套检验换成股价。全样本几乎全军覆没 —— 少数在近 26 年成立的,"
+                "单独标出来作参考,但它们成立的前提是当前这个时代继续下去。"),
+    ]:
+        df = leadlag.run(key)
+        decades = sorted({d for row in df.decades
+                          for d, v in row.items() if v == v})
+        rows = []
+        for _, r in df.iterrows():
+            badge, dim, cls = _TIER_STYLE[r.tier]
+            rows.append({
+                **{c: r[c] for c in ("leader", "title", "tier", "k", "usable",
+                                     "rho", "lo", "hi", "p", "n_eff", "start",
+                                     "k_recent", "rho_recent")},
+                "decades": {d: (r.decades.get(d) if r.decades.get(d) == r.decades.get(d)
+                                else None) for d in decades},
+                "badge": badge, "dim": dim, "rho_cls": cls,
+                "recent_cls": ("text-amber-500" if abs(r.rho_recent) >= 0.30
+                               and r.tier in ("近期有效", "无效") else "text-zinc-500"),
+            })
+        tables.append({"title": leadlag.TARGETS[key], "note": note,
+                       "rows": rows, "decades": decades})
+
+    updated, run = _refresh_ctx()
+    html = env.get_template("leadlag.html").render(
+        updated=updated, run=run, page="leadlag",
+        tables=tables, kmax=leadlag.KMAX, block=leadlag.BLOCK,
+    )
+    (DOCS_DIR / "leadlag.html").write_text(html)
+
+
 def all() -> None:
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     prices = {pid: indicators.load(pid) for pid in layout.PRICE_IDS}
@@ -1885,6 +1934,7 @@ def all() -> None:
     for key in STRATEGY_PAGE_KEYS:
         render_strategy_page(key, prices)
     render_health_page()
+    render_leadlag_page()
     # Old single-page artifact, no longer rendered. Delete if present so the
     # docs/ tree doesn't carry stale routes.
     stale = DOCS_DIR / "strategies.html"

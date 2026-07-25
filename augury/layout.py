@@ -55,16 +55,25 @@ PAGES = {
             {
                 "key": "leading",
                 "label": "领先指标",
-                "subtitle": "课程框架的 5 个 PMI 领先指标。把领先指标按其领先月数向右平移,与现 PMI 对齐;today 线右侧即「预测段」。",
+                "subtitle": "课程框架的 5 个 PMI 领先指标。平移月数是<strong>实测</strong>的 —— "
+                            "跑 <span class='num'>python -m augury leadlag</span> 重算,"
+                            "完整证伪过程见<a href='leadlag.html'>「验证」页</a>。"
+                            "today 线右侧即「预测段」。",
+                # lead_months below are measured, not nominal. Whoever edits these:
+                # re-run `python -m augury leadlag` rather than adjusting by feel —
+                # 5 of the 7 nominal values here were wrong, one by 9 months.
                 "featured": [
                     {
                         "kind": "overlay", "priority": 1,
-                        "title": "ISM 新订单 − 库存 → PMI (lead 2m)",
-                        "desc": "新订单多、库存少 → 未来要补库 → PMI 上行;反之将走弱。课程提到的最直接领先指标,大致领先 2-3 月。",
-                        "spec": "main: ISM_PMI · leader: ISM_NOC_MINUS_IVC (composite of DBnomics ISM/neword − ISM/inventories) · lead 2m",
+                        "title": "ISM 新订单 − 库存 → PMI (实测 lead 6m)",
+                        "desc": "新订单多、库存少 → 未来要补库 → PMI 上行;反之将走弱。课程提到的最直接领先指标。"
+                                "<strong>实测领先 6 个月(原标 2m),corr +0.80 —— 全表最高,"
+                                "但数据只到 2015 年,n_eff=15、只覆盖一个年代,没经过跨周期检验。</strong>"
+                                "当线索用,别当地基。",
+                        "spec": "main: ISM_PMI · leader: ISM_NOC_MINUS_IVC (composite of DBnomics ISM/neword − ISM/inventories) · 实测 lead 6m (原标 2m) · corr +0.80 · 判定「样本短」",
                         "main_id": "ISM_PMI", "main_name": "ISM PMI",
                         "leader_id": "ISM_NOC_MINUS_IVC", "leader_name": "ISM 新订单 − 库存",
-                        "lead_months": 2, "invert": False,
+                        "lead_months": 6, "invert": False,
                         "source": "ISM via DBnomics",
                     },
                     {
@@ -79,55 +88,60 @@ PAGES = {
                     },
                     {
                         "kind": "overlay", "priority": 1,
-                        "title": "费城联储未来活动 6m → PMI (lead 6m)",
-                        "desc": "直接问企业主对未来 6 个月的预期。课程评价:对底和顶都很清晰,是判断 PMI 拐点的高质量软指标。",
-                        "spec": "main: ISM_PMI · leader: FRED:GAFDFSA066MSFRBPHI (Philly Fed Future Activity 6m) · lead 6m",
+                        "title": "费城联储未来活动 6m → PMI (实测 lead 11m)",
+                        "desc": "直接问企业主对未来 6 个月的预期。课程评价:对底和顶都很清晰,是判断 PMI 拐点的高质量软指标。"
+                                "<strong>实测领先 11 个月(原标 6m),corr +0.46,1969 年起。</strong>"
+                                "注意 80 年代只有 +0.03,那十年它几乎不工作。",
+                        "spec": "main: ISM_PMI · leader: FRED:GAFDFSA066MSFRBPHI (Philly Fed Future Activity 6m) · 实测 lead 11m (原标 6m) · corr +0.46 · 判定「稳健」",
                         "main_id": "ISM_PMI", "main_name": "ISM PMI",
                         "leader_id": "GAFDFSA066MSFRBPHI", "leader_name": "费城联储未来活动 6m",
-                        "lead_months": 6, "invert": False,
+                        "lead_months": 11, "invert": False,
                         "source": "FRED:GAFDFSA066MSFRBPHI",
                     },
                     {
                         "kind": "overlay", "priority": 1,
-                        "title": "OECD 领先指标月变动扩散 → PMI (lead 6m)",
-                        "desc": "OECD 综合领先指标中「上升」成员国占比。课程提醒:对顶部敏感,偶尔给假顶,需与其它领先指标交叉验证。",
-                        "spec": "(待接入) leader: OECD 月度 CLI 中环比上升成员国占比 (扩散指数, 0-100) · main: ISM_PMI · lead 6m。OECD CLI 在 FRED 有 USALOLITONOSTSAM 但扩散需自算。",
+                        "title": "OECD 领先指标月变动扩散 → PMI (实测 lead 6m ✓)",
+                        "desc": "OECD 综合领先指标中「上升」成员国占比。课程提醒:对顶部敏感,偶尔给假顶,需与其它领先指标交叉验证。"
+                                "<strong>全表最可靠的一个:实测领先 6 个月,与标称一致(七个里唯一标对的),"
+                                "corr +0.57,1969 年起六个年代全部同号。</strong>"
+                                "但它晚约 2 个月发布,真正能用的领先只有 4 个月。",
+                        "spec": "leader: OECD 月度 CLI 中环比上升成员国占比 (扩散指数, 0-100, 自算) · main: ISM_PMI · 实测 lead 6m = 标称 · 可用 4m (扣发布时滞) · corr +0.57 · 判定「稳健」",
                         "main_id": "ISM_PMI", "main_name": "ISM PMI",
                         "leader_id": "OECD_CLI_DIFFUSION", "leader_name": "OECD 扩散指数",
                         "lead_months": 6, "invert": False,
-                        "source": "OECD · 待接入",
+                        "source": "OECD SDMX · 自算",
                     },
                     {
                         "kind": "overlay", "priority": 1,
-                        "title": "美联储金融脉冲增速指数 FCI-G → PMI (lead 3m, 反转视图)",
-                        "desc": "Fed Board 的 FCI-G(1 年回看版,即「过去一年金融条件变化」对未来 GDP 增速的脉冲)。正值=金融条件收紧(逆风),负值=宽松(顺风)。反转后:线上行 → 经济顺风 → 未来 PMI 上行。",
-                        "spec": "main: ISM_PMI · leader: FCI_G_1Y (Fed Board FCI-G, 1 年回看, monthly_1yr CSV — macromicro 同款) · 取负显示 · lead 3m",
+                        "title": "美联储金融脉冲增速指数 FCI-G → PMI (实测 lead 2m, 反转视图)",
+                        "desc": "Fed Board 的 FCI-G(1 年回看版,即「过去一年金融条件变化」对未来 GDP 增速的脉冲)。正值=金融条件收紧(逆风),负值=宽松(顺风)。反转后:线上行 → 经济顺风 → 未来 PMI 上行。"
+                                "<strong>实测领先只有 2 个月(原标 3m),corr −0.48,而且 90 年代符号是反的(+0.13)。</strong>"
+                                "扣掉发布时滞后可用领先仅 1 个月 —— 更接近同步指标。",
+                        "spec": "main: ISM_PMI · leader: FCI_G_1Y (Fed Board FCI-G, 1 年回看, monthly_1yr CSV — macromicro 同款) · 取负显示 · 实测 lead 2m (原标 3m) · 可用 1m · corr −0.48 · 判定「近期有效」(90 年代变号)",
                         "main_id": "ISM_PMI", "main_name": "ISM PMI",
                         "leader_id": "FCI_G_1Y", "leader_name": "FCI-G (反转)",
-                        "lead_months": 3, "invert": True,
+                        "lead_months": 2, "invert": True,
                         "source": "federalreserve.gov · FCI-G 1yr",
                     },
                     {
                         "kind": "overlay", "priority": 3,
-                        "title": "10Y-2Y 收益曲线 → PMI (lead 12m+)",
-                        "desc": "经典衰退信号:倒挂 (<0) → 12-18 月内衰退风险显著上升;转正回升 → 周期触底。课程未在 5 个领先指标内,但广为流通的标准衰退指标。",
-                        "spec": "main: ISM_PMI · leader: FRED:T10Y2Y · lead 12m",
+                        "title": "10Y-2Y 收益曲线 → PMI (实测 lead 11m)",
+                        # desc renders with |safe — bare "<" must be escaped.
+                        "desc": "经典衰退信号:倒挂 (&lt;0) → 12-18 月内衰退风险显著上升;转正回升 → 周期触底。课程未在 5 个领先指标内,但广为流通的标准衰退指标。"
+                                "<strong>实测领先 11 个月(原标 12m,基本对),corr +0.42,1976 年起六个年代同号。</strong>"
+                                "10 年代只有 +0.14 —— 那轮曲线倒挂后衰退迟迟没来,就是这个数。",
+                        "spec": "main: ISM_PMI · leader: FRED:T10Y2Y · 实测 lead 11m (原标 12m) · corr +0.42 · 判定「稳健」",
                         "main_id": "ISM_PMI", "main_name": "ISM PMI",
                         "leader_id": "T10Y2Y", "leader_name": "10Y-2Y Spread",
-                        "lead_months": 12, "invert": False,
+                        "lead_months": 11, "invert": False,
                         "source": "FRED:T10Y2Y",
                     },
-                    {
-                        "kind": "overlay", "priority": 3,
-                        "title": "中国总信贷 YoY → PMI (lead 6-12m, 代理)",
-                        "desc": "课程「母图」上的领先指标(未详谈)。**用 BIS「中国私营非金融部门总信贷」YoY 作为代理**,完整的「信贷脉冲」需用 PBoC 社融自算 (Δ流量/GDP),本图取季度数据作折中。",
-                        "spec": "main: ISM_PMI · leader: FRED:CRDQCNAPABIS → YoY% (BIS 中国总信贷, 季度) · lead 9m。代理性指标,与 macromicro 严格 credit impulse 数值不完全等同。",
-                        "main_id": "ISM_PMI", "main_name": "ISM PMI",
-                        "leader_id": "CRDQCNAPABIS", "leader_name": "China Credit YoY (BIS 代理)",
-                        "leader_transform": "yoy",
-                        "lead_months": 9, "invert": False,
-                        "source": "BIS via FRED:CRDQCNAPABIS",
-                    },
+                    # 中国总信贷 YoY (CRDQCNAPABIS) 曾在这里,标 lead 9m。实测最佳领先
+                    # 0 个月、corr +0.10、扫描校正后 p=1.000 —— 0~24 个月里没有一个
+                    # 位置比随机平移更好。图已删除:面板上放一张已知无效的图,只会让人
+                    # 下意识读它的形状。指标本身仍在 catalog 和 leadlag 里,结论保留在
+                    # 「验证」页和 INDICATORS.md。真要用中国信贷脉冲,得换 PBoC 社融
+                    # 口径 (Δ流量/GDP) 重做,而不是拿 BIS 存量同比当代理。
                 ],
             },
 

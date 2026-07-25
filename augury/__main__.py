@@ -12,11 +12,17 @@ def cli() -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("run", help="Refresh data and render all pages")
     sub.add_parser("parity", help="Check JS engine matches Python backtest")
+    ll = sub.add_parser("leadlag", help="Validate leading-indicator lead times")
+    ll.add_argument("--target", choices=["pmi", "spx", "both"], default="both")
     args = parser.parse_args()
     if args.cmd == "run":
         run()
     elif args.cmd == "parity":
         sys.exit(parity())
+    elif args.cmd == "leadlag":
+        from augury import leadlag
+        for t in (["pmi", "spx"] if args.target == "both" else [args.target]):
+            leadlag.report(t)
 
 
 def run() -> None:

@@ -15,19 +15,24 @@ def _fred(id, title, **kw):
     ))
 
 
-def _price(id, ticker, title, **kw):
+def _price(id, ticker, title, start=None, **kw):
+    params = {"ticker": ticker}
+    if start:
+        params["start"] = start
     return register(Indicator(
         id=id, title=title, fetcher=f.yahoo,
         source_url=f"https://finance.yahoo.com/quote/{ticker}",
         frequency="daily", value_column="Close",
-        params={"ticker": ticker}, **kw,
+        params=params, **kw,
     ))
 
 
 # ---------- Prices (yfinance) ----------
 # Indices / macro
-_price("SPX",   "^GSPC",   "S&P 500",          unit="$")
-_price("NDX",   "^NDX",    "Nasdaq 100",       unit="$")
+# Full Yahoo history — the lead/lag validator needs every recession it can get.
+# Only applies to a from-scratch fetch; both parquets are already backfilled.
+_price("SPX",   "^GSPC",   "S&P 500",          unit="$", start="1927-01-01")
+_price("NDX",   "^NDX",    "Nasdaq 100",       unit="$", start="1985-10-01")
 # Tradeable proxies for the index strategies (T+1 open execution needs a
 # real instrument with an open price). SPY since 1993, QQQ since 1999;
 # total-return (includes dividend reinvestment) so the equity curve reflects

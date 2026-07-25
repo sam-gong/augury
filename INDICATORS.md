@@ -27,15 +27,27 @@ PMI 是同步指标;看它的领先指标预判未来 2-12 月方向。
 
 ### 领先指标(5+ 张 overlay 大图)
 
-| 主线 | 领先指标 | 领先 | leader ID | 来源 | 状态 |
-|---|---|---|---|---|---|
-| `ISM_PMI` | ISM 新订单 − 库存 | 2m | `ISM_NOC_MINUS_IVC` (自算) | DBnomics ISM/neword + ISM/inventories | ✅ |
-| `ISM_PMI` | 全球央行降息比例 | 9m | `GLOBAL_CB_CUT_RATIO` | — | ❌ MM 口径未公开,留白 |
-| `ISM_PMI` | 费城联储未来活动 6m | 6m | `GAFDFSA066MSFRBPHI` | FRED | ✅ |
-| `ISM_PMI` | OECD CLI 月变动扩散 | 6m | `OECD_CLI_DIFFUSION` | OECD SDMX,自算扩散 | ✅ |
-| `ISM_PMI` | Fed FCI-G 1Y(反转视图) | 3m | `FCI_G_1Y` | federalreserve.gov CSV | ✅ |
-| `ISM_PMI` | 10Y-2Y 收益曲线 | 12m | `T10Y2Y` | FRED | ✅ |
-| `ISM_PMI` | 中国总信贷 YoY (BIS 代理) | 9m | `CRDQCNAPABIS` | FRED (BIS) | ✅ |
+领先期是**实测**的,不是标称的 —— 跑 `python -m augury leadlag` 重算(见
+[augury/leadlag.py](augury/leadlag.py)),完整结果连同分年代明细渲染在顶栏「验证」
+页([docs/leadlag.html](docs/leadlag.html))。**可用领先 = 实测领先 − 发布时滞**,
+排序看的是这一列:OECD CLI 领先 PMI 6 个月但晚 2 个月才发布,真正能用的只有 4 个月。
+
+| 主线 | 领先指标 | 标称 | **实测** | **可用** | corr | 判定 | leader ID | 来源 |
+|---|---|---|---|---|---|---|---|---|
+| `ISM_PMI` | OECD CLI 月变动扩散 | 6m | **6m** | 4m | **+0.57** | ✅ 最强,1969 起六个年代同号 | `OECD_CLI_DIFFUSION` | OECD SDMX,自算扩散 |
+| `ISM_PMI` | 费城联储未来活动 6m | 6m | **11m** | 11m | +0.46 | ✅ 但 80 年代只有 +0.03 | `GAFDFSA066MSFRBPHI` | FRED |
+| `ISM_PMI` | 10Y-2Y 收益曲线 | 12m | **11m** | 11m | +0.42 | ✅ | `T10Y2Y` | FRED |
+| `ISM_PMI` | ISM 新订单 − 库存 | 2m | **6m** | 6m | +0.80 | ⚠️ 只有 2015 年起,n_eff=15,**未经跨年代检验** | `ISM_NOC_MINUS_IVC` (自算) | DBnomics ISM/neword + ISM/inventories |
+| `ISM_PMI` | Fed FCI-G 1Y(反转视图) | 3m | **2m** | 1m | −0.48 | ⚠️ 90 年代变号(+0.13) | `FCI_G_1Y` | federalreserve.gov CSV |
+| ~~`ISM_PMI`~~ | ~~中国总信贷 YoY (BIS 代理)~~ | 9m | **0m** | −5m | **+0.10** | ❌ **失效,图已从 cycle.html 删除**。扫描校正后 p=1.00,0~24 个月无一位置优于随机平移。指标仍在 catalog/leadlag 里 | `CRDQCNAPABIS` | FRED (BIS) |
+| `ISM_PMI` | 全球央行降息比例 | 9m | — | — | — | ❌ MM 口径未公开,留白 | `GLOBAL_CB_CUT_RATIO` | — |
+
+未在本页但实测通过的两个:**UMich 1年通胀预期**(`MICH`,领先 14m,−0.42)和
+**芝加哥联储 NFCI**(领先 3m,−0.38)。
+
+以及一条对整页的限定:同一套检验跑 `leader → 标普未来6个月回报`,**18 个指标 0 个判定「稳健」**
+—— 唯一显著的是 ISM 新订单−库存(−0.60),但它只有 2015 年后一个年代;其余全部
+p >0.05 或跨年代变号。这些指标预判的是经济,不是股价。
 
 ### 当前位置
 
